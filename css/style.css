@@ -162,6 +162,25 @@ body {
   gap: 12px;
 }
 
+@media (max-width: 760px) {
+  #app-header { padding: 8px 12px; }
+  #app-header h1 { font-size: 17px; }
+  #mission-banner { padding: 8px 12px; }
+  #app-main {
+    flex-direction: column;
+    padding: 8px 12px;
+  }
+  #network-svg { min-height: 260px; }
+  #side-panel { width: auto; }
+  #stage-actions button,
+  #stage-actions select,
+  #stage-actions input[type=text] {
+    white-space: nowrap;
+  }
+  #control-bar { padding: 8px 12px; }
+  #log-panel { padding: 8px 12px; height: 110px; }
+}
+
 #packet-detail-box, #table-views {
   background: var(--panel);
   border: 1px solid var(--border);
