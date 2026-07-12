@@ -386,7 +386,7 @@ const stage2 = {
   id: 'stage2',
   navLabel: '2. スイッチ',
   title: 'ステージ2：スイッチの配送センター',
-  missionText: '4台のPCがスイッチにつながっている。送信元と宛先を選んで送信してみよう。\n最初は宛先を知らないので全ポートへ配送（フラッディング）するが、一度覚えると必要な方向にだけ届くようになる。',
+  missionText: '4台のPCがスイッチにつながっている。送信元と宛先を選んで送信してみよう。\n①まずPC-A→PC-Bで送信（宛先を知らないので全ポートへフラッディングされる）\n②次にPC-B→PC-A（逆方向）で送信（PC-Aの場所はもう覚えているのでユニキャストになる）\nスイッチは「送信元」の場所だけを覚える点がポイント。',
   revealFields: { ip: false, mac: true, ttl: false },
   zones: [],
   editableCables: false,
@@ -420,6 +420,7 @@ const stage2 = {
     dstSelect.selectedIndex = 1;
     container.appendChild(labeledWrap('送信元', srcSelect));
     container.appendChild(labeledWrap('宛先', dstSelect));
+
     const btn = document.createElement('button');
     btn.textContent = '送信';
     btn.addEventListener('click', () => {
@@ -446,9 +447,28 @@ const stage2 = {
           api.setStatus('フラッディングとユニキャスト、両方の動きを確認できました！', 'success');
           api.completeStage();
         }
+        api.refreshActions();
       });
     });
     container.appendChild(btn);
+
+    const swapBtn = document.createElement('button');
+    swapBtn.className = 'secondary';
+    swapBtn.textContent = '送信元⇔宛先を入れ替え';
+    swapBtn.addEventListener('click', () => {
+      const tmp = srcSelect.value;
+      srcSelect.value = dstSelect.value;
+      dstSelect.value = tmp;
+    });
+    container.appendChild(swapBtn);
+
+    const checklist = document.createElement('div');
+    checklist.style.cssText = 'width:100%;font-size:12px;color:var(--text-dim);';
+    checklist.innerHTML =
+      `<span style="color:${state.stageRuntime.hadFlood ? 'var(--ok)' : 'var(--text-dim)'}">${state.stageRuntime.hadFlood ? '☑' : '☐'} フラッディングを確認</span>`
+      + '&nbsp;&nbsp;'
+      + `<span style="color:${state.stageRuntime.hadUnicast ? 'var(--ok)' : 'var(--text-dim)'}">${state.stageRuntime.hadUnicast ? '☑' : '☐'} ユニキャストを確認</span>`;
+    container.appendChild(checklist);
   },
 };
 
