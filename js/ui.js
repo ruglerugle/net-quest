@@ -170,10 +170,12 @@ export function renderTables(state) {
         (entries.length
           ? entries.map(([ip, mac]) => `<tr><td>${escapeHtml(ip)}</td><td>${escapeHtml(mac)}</td></tr>`).join('')
           : '<tr><td colspan="2" style="color:var(--text-dim)">まだ解決していません</td></tr>');
-    } else if (spec.kind === 'routing') {
-      const entries = device.routingTable ?? [];
-      table.innerHTML = '<tr><th>宛先ネットワーク</th><th>出口</th></tr>' +
-        entries.map((r) => `<tr><td>${escapeHtml(r.network)}</td><td>${escapeHtml(r.via)}</td></tr>`).join('');
+    } else if (spec.kind === 'dns') {
+      const entries = Object.entries(device.dnsCache ?? {});
+      table.innerHTML = '<tr><th>ドメイン名</th><th>IPアドレス</th></tr>' +
+        (entries.length
+          ? entries.map(([domain, ip]) => `<tr><td>${escapeHtml(domain)}</td><td>${escapeHtml(ip)}</td></tr>`).join('')
+          : '<tr><td colspan="2" style="color:var(--text-dim)">まだキャッシュがありません</td></tr>');
     }
     box.appendChild(table);
   }

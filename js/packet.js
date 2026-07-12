@@ -20,7 +20,12 @@ export function createPacket(opts) {
     srcIp: opts.srcIp ?? null,
     dstIp: opts.dstIp ?? null,
     ttl: opts.ttl ?? null,
+    srcPort: opts.srcPort ?? null,
+    dstPort: opts.dstPort ?? null,
+    seq: opts.seq ?? null,
+    ack: opts.ack ?? null,
     arpQueryIp: opts.arpQueryIp ?? null,
+    queryDomain: opts.queryDomain ?? null,
     data: opts.data ?? null,
     note: opts.note ?? null,
     dstMacTag: opts.dstMacTag ?? null,
@@ -69,11 +74,25 @@ const TYPE_LABEL = {
   'ARP-REPLY': 'ARP応答',
   'ICMP-ECHO': 'ICMP Echo Request（ping）',
   'ICMP-REPLY': 'ICMP Echo Reply（ping応答）',
+  'DHCP-DISCOVER': 'DHCP Discover（ブロードキャスト）',
+  'DHCP-OFFER': 'DHCP Offer',
+  'DHCP-REQUEST': 'DHCP Request',
+  'DHCP-ACK': 'DHCP ACK',
+  'DNS-QUERY': 'DNS問い合わせ',
+  'DNS-RESPONSE': 'DNS応答',
+  'TCP-SYN': 'TCP SYN',
+  'TCP-SYNACK': 'TCP SYN/ACK',
+  'TCP-ACK': 'TCP ACK',
+  'TCP-DATA': 'TCPデータ',
+  'TCP-DATA-ACK': 'TCPデータ ACK',
+  'UDP-DATA': 'UDPデータ',
+  'HTTP-GET': 'HTTP GETリクエスト',
+  'HTTP-RESPONSE': 'HTTP レスポンス',
 };
 
 /**
  * サイドパネル表示用に、ステージで解禁されている情報だけを整形して返す。
- * @param {{ip?:boolean, mac?:boolean, ttl?:boolean}} reveal
+ * @param {{ip?:boolean, mac?:boolean, ttl?:boolean, port?:boolean}} reveal
  */
 export function packetDetailRows(packet, reveal, resolveLabel) {
   const rows = [];
@@ -90,8 +109,14 @@ export function packetDetailRows(packet, reveal, resolveLabel) {
     rows.push({ k: '宛先', v: resolveLabel ? resolveLabel(packet.toId) : packet.toId });
   }
 
+  if (reveal.port && packet.srcPort != null) rows.push({ k: '送信元ポート', v: packet.srcPort });
+  if (reveal.port && packet.dstPort != null) rows.push({ k: '宛先ポート', v: packet.dstPort });
+  if (reveal.port && packet.seq != null) rows.push({ k: 'シーケンス番号', v: packet.seq });
+  if (reveal.port && packet.ack != null) rows.push({ k: 'ACK番号', v: packet.ack });
+
   if (reveal.ttl && packet.ttl != null) rows.push({ k: 'TTL', v: packet.ttl });
   if (packet.arpQueryIp) rows.push({ k: '問い合わせ先IP', v: packet.arpQueryIp });
+  if (packet.queryDomain) rows.push({ k: '問い合わせドメイン', v: packet.queryDomain });
   if (packet.data) rows.push({ k: 'データ', v: packet.data });
   if (packet.note) rows.push({ k: 'メモ', v: packet.note });
   return rows;

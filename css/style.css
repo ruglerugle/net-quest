@@ -311,6 +311,20 @@ body {
 .packet-dot.type-ARP-REPLY { fill: var(--ok); }
 .packet-dot.type-ICMP-ECHO { fill: var(--accent); }
 .packet-dot.type-ICMP-REPLY { fill: #7fe0d6; }
+.packet-dot.type-DHCP-DISCOVER { fill: var(--warn); }
+.packet-dot.type-DHCP-OFFER { fill: #c58fff; }
+.packet-dot.type-DHCP-REQUEST { fill: #9a6fd1; }
+.packet-dot.type-DHCP-ACK { fill: var(--ok); }
+.packet-dot.type-DNS-QUERY { fill: #ffcf5c; }
+.packet-dot.type-DNS-RESPONSE { fill: var(--ok); }
+.packet-dot.type-TCP-SYN { fill: #ff8fab; }
+.packet-dot.type-TCP-SYNACK { fill: #ff6fa5; }
+.packet-dot.type-TCP-ACK { fill: var(--ok); }
+.packet-dot.type-TCP-DATA { fill: var(--accent); }
+.packet-dot.type-TCP-DATA-ACK { fill: #7fe0d6; }
+.packet-dot.type-UDP-DATA { fill: #9aa6c4; }
+.packet-dot.type-HTTP-GET { fill: var(--accent); }
+.packet-dot.type-HTTP-RESPONSE { fill: #7fe0d6; }
 .packet-dot.selected { stroke: #fff; stroke-width: 3; }
 
 .packet-label {
