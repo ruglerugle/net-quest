@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NET QUEST ― 届け！そのパケット ―</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header id="app-header">
+  <h1>NET QUEST <span class="subtitle">― 届け！そのパケット ―</span></h1>
+  <nav id="stage-nav"></nav>
+</header>
+
+<div id="mission-banner">
+  <div id="mission-title"></div>
+  <div id="mission-text"></div>
+  <div id="mission-status"></div>
+</div>
+
+<main id="app-main">
+  <section id="stage-area">
+    <svg id="network-svg" viewBox="0 0 900 480" preserveAspectRatio="xMidYMid meet"></svg>
+    <div id="stage-actions"></div>
+  </section>
+
+  <aside id="side-panel">
+    <div id="packet-detail-box">
+      <h3>パケット詳細</h3>
+      <div id="packet-detail"><p class="hint">パケットをクリックすると中身が見られます</p></div>
+    </div>
+    <div id="table-views"></div>
+  </aside>
+</main>
+
+<footer id="control-bar">
+  <button id="btn-play" title="再生">▶ 再生</button>
+  <button id="btn-pause" title="一時停止">⏸ 一時停止</button>
+  <button id="btn-step" title="1ステップ進める">1ステップ</button>
+  <label class="speed-label">速度
+    <input type="range" id="speed-slider" min="0.5" max="3" step="0.5" value="1">
+  </label>
+  <button id="btn-reset" title="ステージをやり直す">↺ ステージリセット</button>
+</footer>
+
+<div id="log-panel">
+  <h3>通信ログ</h3>
+  <ul id="log-list"></ul>
+</div>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
