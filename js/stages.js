@@ -125,8 +125,8 @@ function runSimplePing(state, api, { client, sw, server, onSuccess }) {
 
 /** 別ネットワークへのルーター経由ping（ステージ5・最終ミッション共通） */
 function runRouterPing(state, api, { client, sw1, rt, sw2, server, onSuccess }) {
-  const blueIface = rt.interfaces.find((i) => i.side === 'blue');
-  const redIface = rt.interfaces.find((i) => i.side === 'red');
+  const blueIface = rt.interfaces.find((i) => sameSubnet(i.ip, client.ip));
+  const redIface = rt.interfaces.find((i) => sameSubnet(i.ip, server.ip));
 
   function sendForward() {
     if (!client.arpTable[client.gateway]) {
@@ -1212,4 +1212,602 @@ const stage11 = {
   },
 };
 
-export const STAGES = [stage1, stage2, stage3, stage4, stage5, finalStage, stage7, stage8, stage9, stage10, stage11];
+// ===================== ステージ12：TLS秘密通信 =====================
+
+function runTlsHandshake(state, api, { client, server, scenario, onCertReceived }) {
+  api.log(`${client.label}「対応できる暗号方式はどれですか？」（ClientHello）`);
+  const hello1 = { type: 'TLS-CLIENTHELLO', srcMac: client.mac, dstMac: server.mac };
+  const p1 = createPacket({
+    ...hello1, fromId: client.id, toId: server.id,
+    onArrive: (s) => {
+      api.log(`${server.label}「この暗号方式にしましょう。こちらが証明書です」（ServerHello + 証明書）`, 'ok');
+      const hello2 = {
+        type: 'TLS-SERVERHELLO', srcMac: server.mac, dstMac: client.mac,
+        certSubject: scenario.certSubject, certIssuer: scenario.certIssuer,
+        certValidUntil: scenario.certValidUntil, requestedDomain: scenario.requestedDomain,
+      };
+      const p2 = createPacket({
+        ...hello2, fromId: server.id, toId: client.id,
+        onArrive: (s2) => {
+          api.log(`${client.label}が証明書を受け取りました。内容を確認してください。`, 'arp');
+          onCertReceived(s2, scenario);
+        },
+      });
+      s.packets.push(p2);
+      api.render();
+    },
+  });
+  state.packets.push(p1);
+  api.render();
+}
+
+function proceedTlsAfterTrust(state, api, { client, server, onEstablished }) {
+  api.log(`${client.label}「この鍵を使って暗号化しましょう」（鍵交換）`, 'arp');
+  const key = { type: 'TLS-KEYEXCHANGE', srcMac: client.mac, dstMac: server.mac };
+  const p1 = createPacket({
+    ...key, fromId: client.id, toId: server.id,
+    onArrive: (s) => {
+      api.log(`${server.label}「了解、これで暗号化通信を開始します」（Finished）`, 'ok');
+      const fin = { type: 'TLS-FINISHED', srcMac: server.mac, dstMac: client.mac };
+      const p2 = createPacket({
+        ...fin, fromId: server.id, toId: client.id,
+        onArrive: (s2) => {
+          api.log('TLSハンドシェイク完了。ここから先は暗号化されます。', 'ok');
+          const plain = 'password: network123';
+          const cipher = plain.split('').map((c) => c.charCodeAt(0).toString(16)).join('');
+          api.log(`暗号化前：${plain}`);
+          api.log(`暗号化後：${cipher}`, 'ok');
+          const appData = { type: 'TLS-APPDATA', srcMac: client.mac, dstMac: server.mac, data: cipher, note: `平文: ${plain}` };
+          const p3 = createPacket({
+            ...appData, fromId: client.id, toId: server.id,
+            onArrive: (s3) => {
+              api.log(`${server.label}が暗号化データを受信しました。`, 'ok');
+              onEstablished(s3);
+            },
+          });
+          s2.packets.push(p3);
+          api.render();
+        },
+      });
+      s.packets.push(p2);
+      api.render();
+    },
+  });
+  state.packets.push(p1);
+  api.render();
+}
+
+const TLS_SCENARIOS = {
+  legit: {
+    certSubject: 'example.com', certIssuer: '信頼された認証局', certValidUntil: '2027-06-30',
+    requestedDomain: 'example.com', legit: true,
+  },
+  fake: {
+    certSubject: 'www.evil.example', certIssuer: '信頼された認証局', certValidUntil: '2027-06-30',
+    requestedDomain: 'example.com', legit: false,
+  },
+};
+
+const stage12 = {
+  id: 'stage12',
+  navLabel: '12. TLS',
+  title: 'ステージ12：TLS秘密通信',
+  missionText: 'HTTPSサーバーに接続すると、証明書が提示される。発行対象がアクセス先ドメインと一致しているかを確認してから信頼するかどうかを判断しよう。\n正規サーバーには「信頼する」、なりすましサーバーには「信頼しない」を選べるようになろう。',
+  revealFields: { ip: true, mac: true, ttl: false, port: true },
+  zones: [],
+  editableCables: false,
+  tablesToShow: [],
+  build() {
+    return {
+      devices: [
+        { id: 'pc', type: 'pc', label: 'PC', x: 200, y: 240, ip: '192.168.1.10', mac: 'AA:AA:AA:AA:AA:10' },
+        { id: 'srv', type: 'server', label: 'HTTPSサーバー', x: 700, y: 240, ip: '203.0.113.20', mac: 'CC:CC:CC:CC:CC:43' },
+      ],
+      edges: [{ id: 'e1', a: 'pc', b: 'srv', connected: true }],
+      runtime: { acceptedLegit: false, rejectedFake: false, pendingCert: null },
+    };
+  },
+  renderActions(container, state, api) {
+    const dev = (id) => state.devices.find((d) => d.id === id);
+    const select = document.createElement('select');
+    select.appendChild(new Option('正規サーバーに接続 (example.com)', 'legit'));
+    select.appendChild(new Option('なりすましサーバーに接続', 'fake'));
+    container.appendChild(labeledWrap('接続先', select));
+
+    const btn = document.createElement('button');
+    btn.textContent = 'HTTPS接続を開始する';
+    btn.addEventListener('click', () => {
+      const scenario = TLS_SCENARIOS[select.value];
+      runTlsHandshake(state, api, {
+        client: dev('pc'), server: dev('srv'), scenario,
+        onCertReceived: (s, sc) => {
+          state.stageRuntime.pendingCert = sc;
+          api.refreshActions();
+        },
+      });
+    });
+    container.appendChild(btn);
+
+    if (state.stageRuntime.pendingCert) {
+      const cert = state.stageRuntime.pendingCert;
+      const quizRow = document.createElement('div');
+      quizRow.className = 'quiz-row';
+      const info = document.createElement('span');
+      info.style.cssText = 'font-family:Consolas,monospace;font-size:11px;white-space:pre-line;';
+      info.textContent = `アクセス先: ${cert.requestedDomain}\n発行対象: ${cert.certSubject}\n発行者: ${cert.certIssuer}\n有効期限: ${cert.certValidUntil}\nこの証明書を信頼しますか？`;
+      quizRow.appendChild(info);
+
+      const trustBtn = document.createElement('button');
+      trustBtn.textContent = '信頼する';
+      trustBtn.addEventListener('click', () => {
+        state.stageRuntime.pendingCert = null;
+        if (cert.legit) {
+          api.log('正しい判断です。証明書の発行対象がアクセス先と一致しています。', 'ok');
+          proceedTlsAfterTrust(state, api, {
+            client: dev('pc'), server: dev('srv'),
+            onEstablished: () => {
+              state.stageRuntime.acceptedLegit = true;
+              if (state.stageRuntime.acceptedLegit && state.stageRuntime.rejectedFake) {
+                api.setStatus('正規サーバーとの暗号化通信、なりすましの検知、両方できました！', 'success');
+                api.completeStage();
+              }
+              api.render();
+            },
+          });
+        } else {
+          api.log('危険：証明書の発行対象がアクセス先ドメインと一致していません。なりすましを見逃してしまいました！', 'err');
+        }
+        api.refreshActions();
+      });
+      quizRow.appendChild(trustBtn);
+
+      const rejectBtn = document.createElement('button');
+      rejectBtn.className = 'secondary';
+      rejectBtn.textContent = '信頼しない';
+      rejectBtn.addEventListener('click', () => {
+        state.stageRuntime.pendingCert = null;
+        if (!cert.legit) {
+          api.log('正しく検知できました！なりすましサーバーへの接続を拒否しました。', 'ok');
+          state.stageRuntime.rejectedFake = true;
+          if (state.stageRuntime.acceptedLegit && state.stageRuntime.rejectedFake) {
+            api.setStatus('正規サーバーとの暗号化通信、なりすましの検知、両方できました！', 'success');
+            api.completeStage();
+          }
+        } else {
+          api.log('正しい証明書なのに拒否してしまいました。正規サーバーにも接続してみましょう。', 'err');
+        }
+        api.refreshActions();
+        api.render();
+      });
+      quizRow.appendChild(rejectBtn);
+      container.appendChild(quizRow);
+    }
+  },
+};
+
+// ===================== ステージ13：VLANで部署を分離 =====================
+
+const stage13 = {
+  id: 'stage13',
+  navLabel: '13. VLAN',
+  title: 'ステージ13：VLANで部署を分離',
+  missionText: '同じスイッチにつながっていても、VLANが違えば別のネットワークとして分離される。\n同じVLAN同士は直接通信できるが、違うVLAN同士は壁にぶつかる。ルーターの助けを借りれば一部のVLAN間だけ通信できるようになる（来客VLANは他部署から隔離されたまま）。',
+  revealFields: { ip: true, mac: true, ttl: true, port: false },
+  zones: [],
+  editableCables: false,
+  tablesToShow: [
+    { deviceId: 'sw1', kind: 'mac', title: 'スイッチのMACアドレステーブル' },
+    { deviceId: 'rt1', kind: 'arp', title: 'ルーターのARPテーブル' },
+  ],
+  build() {
+    return {
+      devices: [
+        { id: 'salesA', type: 'pc', label: '営業部A (VLAN10)', x: 100, y: 130, ip: '10.0.10.10', mac: 'AA:10:00:00:00:01', gateway: '10.0.10.1', arpTable: {} },
+        { id: 'salesB', type: 'pc', label: '営業部B (VLAN10)', x: 100, y: 350, ip: '10.0.10.20', mac: 'AA:10:00:00:00:02', gateway: '10.0.10.1', arpTable: {} },
+        { id: 'dev', type: 'pc', label: '開発部 (VLAN20)', x: 350, y: 90, ip: '10.0.20.10', mac: 'AA:20:00:00:00:01', gateway: '10.0.20.1', arpTable: {} },
+        { id: 'acc', type: 'pc', label: '経理部 (VLAN30)', x: 350, y: 390, ip: '10.0.30.10', mac: 'AA:30:00:00:00:01', gateway: '10.0.30.1', arpTable: {} },
+        { id: 'guest', type: 'pc', label: '来客Wi-Fi (VLAN99)', x: 600, y: 130, ip: '10.0.99.10', mac: 'AA:99:00:00:00:01', gateway: null, arpTable: {} },
+        { id: 'sw1', type: 'switch', label: 'SW1', x: 450, y: 300, macTable: {} },
+        {
+          id: 'rt1', type: 'router', label: 'RT1(L3)', x: 650, y: 350, arpTable: {},
+          interfaces: [
+            { ip: '10.0.10.1', mac: 'FF:10:00:00:00:01', vlan: 10, side: '10' },
+            { ip: '10.0.20.1', mac: 'FF:20:00:00:00:01', vlan: 20, side: '20' },
+            { ip: '10.0.30.1', mac: 'FF:30:00:00:00:01', vlan: 30, side: '30' },
+          ],
+        },
+      ],
+      edges: [
+        { id: 'e1', a: 'salesA', b: 'sw1', connected: true },
+        { id: 'e2', a: 'salesB', b: 'sw1', connected: true },
+        { id: 'e3', a: 'dev', b: 'sw1', connected: true },
+        { id: 'e4', a: 'acc', b: 'sw1', connected: true },
+        { id: 'e5', a: 'guest', b: 'sw1', connected: true },
+        { id: 'e6', a: 'sw1', b: 'rt1', connected: true },
+      ],
+      runtime: { sameVlanOk: false, blockedObserved: false, crossVlanRouted: false },
+    };
+  },
+  renderActions(container, state, api) {
+    const dev = (id) => state.devices.find((d) => d.id === id);
+    const pcs = state.devices.filter((d) => d.type === 'pc');
+    const srcSelect = document.createElement('select');
+    const dstSelect = document.createElement('select');
+    for (const pc of pcs) {
+      srcSelect.appendChild(new Option(pc.label, pc.id));
+      dstSelect.appendChild(new Option(pc.label, pc.id));
+    }
+    dstSelect.selectedIndex = 1;
+    container.appendChild(labeledWrap('送信元', srcSelect));
+    container.appendChild(labeledWrap('宛先', dstSelect));
+
+    const btn = document.createElement('button');
+    btn.textContent = '送信する';
+    btn.addEventListener('click', () => {
+      const src = dev(srcSelect.value);
+      const dst = dev(dstSelect.value);
+      if (src.id === dst.id) { api.log('送信元と宛先が同じです。', 'err'); return; }
+      const sw = dev('sw1');
+      const rt = dev('rt1');
+      const srcVlanNum = vlanOf(src);
+      const dstVlanNum = vlanOf(dst);
+
+      if (srcVlanNum === dstVlanNum) {
+        api.log(`${src.label}が${dst.label}（同じVLAN）へフレームを送信しました。`);
+        const frame = { type: 'DATA', srcMac: src.mac, dstMac: dst.mac };
+        sendFrameToSwitch(state, api, sw, src.id, frame, () => {
+          relayThroughSwitch(state, api, sw, src.id, frame, (s2, device) => {
+            if (device.id === dst.id) {
+              api.log(`${device.label}が受信しました。`, 'ok');
+              state.stageRuntime.sameVlanOk = true;
+              checkStage13Win(state, api);
+            } else if (device.id !== rt.id) {
+              api.log(`${device.label}は自分宛てではないため破棄しました。`);
+            }
+            api.render();
+          });
+        });
+        return;
+      }
+
+      const rtHasBoth = rt.interfaces.some((i) => i.vlan === srcVlanNum) && rt.interfaces.some((i) => i.vlan === dstVlanNum);
+      if (!rtHasBoth) {
+        api.log(`${src.label}（VLAN${srcVlanNum}）から${dst.label}（VLAN${dstVlanNum}）へは、透明な壁にぶつかりました。VLANが異なるため通信できません。`, 'err');
+        state.stageRuntime.blockedObserved = true;
+        checkStage13Win(state, api);
+        return;
+      }
+
+      api.log(`${src.label}（VLAN${srcVlanNum}）は別VLANのため、ルーター（L3スイッチ）経由で送ります。`, 'arp');
+      runRouterPing(state, api, {
+        client: src, sw1: sw, rt, sw2: sw, server: dst,
+        onSuccess: () => {
+          state.stageRuntime.crossVlanRouted = true;
+          checkStage13Win(state, api);
+          api.render();
+        },
+      });
+    });
+    container.appendChild(btn);
+  },
+};
+
+function vlanOf(device) {
+  return Number(device.ip.split('.')[2]);
+}
+
+function checkStage13Win(state, api) {
+  const r = state.stageRuntime;
+  if (r.sameVlanOk && r.blockedObserved && r.crossVlanRouted) {
+    api.setStatus('同一VLAN内通信、VLAN間の遮断、ルーター経由での許可、すべて確認できました！', 'success');
+    api.completeStage();
+  }
+}
+
+// ===================== ステージ14：NAT =====================
+
+function runNatPing(state, api, { client, sw1, rt, sw2, server, onSuccess }) {
+  const privateIface = rt.interfaces.find((i) => i.side === 'private');
+  const publicIface = rt.interfaces.find((i) => i.side === 'public');
+  const srcPort = 51000 + Math.floor(Math.random() * 900);
+
+  function stepGateway() {
+    if (client.arpTable[client.gateway]) { stepToRouter(); return; }
+    resolveArpOverSwitch(state, api, sw1, client, client.gateway, (mac) => {
+      client.arpTable[client.gateway] = mac;
+      stepToRouter();
+    });
+  }
+
+  function stepToRouter() {
+    const gwMac = client.arpTable[client.gateway];
+    api.log(`${client.label}が${server.ip}へpingを送信します（送信元 ${client.ip}:${srcPort}）。`);
+    const frame = { type: 'ICMP-ECHO', srcMac: client.mac, dstMac: gwMac, srcIp: client.ip, dstIp: server.ip, srcPort, ttl: 64 };
+    sendFrameToSwitch(state, api, sw1, client.id, frame, () => {
+      relayThroughSwitch(state, api, sw1, client.id, frame, (s2, device) => {
+        if (device.id !== rt.id) return;
+        natTranslateOut(s2, frame);
+      });
+    });
+  }
+
+  function natTranslateOut(state2, frame) {
+    const ttl = frame.ttl - 1;
+    const key = `${frame.srcIp}:${frame.srcPort}`;
+    let globalPort = rt.natTable[key];
+    if (!globalPort) {
+      globalPort = rt.nextPort;
+      rt.nextPort += 1;
+      rt.natTable[key] = globalPort;
+      rt.natReverse[globalPort] = key;
+      api.log(`${rt.label}（NAT）：${key} を ${publicIface.ip}:${globalPort} に変換し、対応表に登録しました。`, 'arp');
+    } else {
+      api.log(`${rt.label}（NAT）：${key} は既に ${publicIface.ip}:${globalPort} に対応付けられています。`, 'ok');
+    }
+    const forward = (dstMac) => {
+      const outFrame = { type: 'ICMP-ECHO', srcMac: publicIface.mac, dstMac, srcIp: publicIface.ip, dstIp: frame.dstIp, srcPort: globalPort, ttl };
+      sendFrameToSwitch(state2, api, sw2, rt.id, outFrame, () => {
+        relayThroughSwitch(state2, api, sw2, rt.id, outFrame, (s3, device) => {
+          if (device.id !== server.id) return;
+          api.log(`${server.label}がpingを受信しました（送信元は${publicIface.ip}:${globalPort}にしか見えません）。`, 'ok');
+          natReturnStep(s3, ttl, globalPort);
+        });
+      });
+    };
+    if (rt.arpTable[server.ip]) {
+      forward(rt.arpTable[server.ip]);
+    } else {
+      resolveArpOverSwitch(state2, api, sw2, { id: rt.id, mac: publicIface.mac, ip: publicIface.ip, label: rt.label }, server.ip, (mac) => {
+        rt.arpTable[server.ip] = mac;
+        forward(mac);
+      });
+    }
+  }
+
+  function natReturnStep(state3, ttlIn, globalPort) {
+    const replyFrame = { type: 'ICMP-REPLY', srcMac: server.mac, dstMac: publicIface.mac, srcIp: server.ip, dstIp: publicIface.ip, dstPort: globalPort, ttl: 64 };
+    sendFrameToSwitch(state3, api, sw2, server.id, replyFrame, () => {
+      relayThroughSwitch(state3, api, sw2, server.id, replyFrame, (s4, device) => {
+        if (device.id !== rt.id) return;
+        const ttl = ttlIn - 1;
+        const key = rt.natReverse[globalPort];
+        const [privateIp, privatePortStr] = key.split(':');
+        api.log(`${rt.label}（NAT）：宛先 ${publicIface.ip}:${globalPort} を対応表から ${privateIp}:${privatePortStr} に戻します。`, 'arp');
+        const backFrame = { type: 'ICMP-REPLY', srcMac: privateIface.mac, dstMac: client.mac, srcIp: server.ip, dstIp: privateIp, dstPort: Number(privatePortStr), ttl };
+        sendFrameToSwitch(s4, api, sw1, rt.id, backFrame, () => {
+          relayThroughSwitch(s4, api, sw1, rt.id, backFrame, (s5, target) => {
+            if (target.id !== client.id) return;
+            api.log(`${client.label}がping応答を受信しました。通信成功！（相手からは社内のプライベートIPは見えません）`, 'ok');
+            onSuccess(s5);
+          });
+        });
+      });
+    });
+  }
+
+  stepGateway();
+}
+
+const stage14 = {
+  id: 'stage14',
+  navLabel: '14. NAT',
+  title: 'ステージ14：NAT（アドレス変換）',
+  missionText: '社内のプライベートIPアドレスは、インターネットにそのままでは出られない。ルーターがNATで送信元をグローバルIPアドレスに変換する。\nPC-AとPC-Bの両方からアクセスし、1つのグローバルIPを複数のPCで共有できることを確認しよう。',
+  revealFields: { ip: true, mac: true, ttl: true, port: true },
+  zones: [
+    { x: 20, y: 170, w: 390, h: 150, color: 'blue', label: '社内LAN（プライベートIP）192.168.1.0/24' },
+    { x: 440, y: 170, w: 400, h: 150, color: 'red', label: 'インターネット側（グローバルIP）' },
+  ],
+  editableCables: false,
+  tablesToShow: [{ deviceId: 'rt1', kind: 'nat', title: 'NAT対応表' }],
+  build() {
+    return {
+      devices: [
+        { id: 'pcA', type: 'pc', label: 'PC-A', x: 90, y: 170, ip: '192.168.1.10', mac: 'AA:AA:AA:AA:AA:10', gateway: '192.168.1.1', arpTable: {} },
+        { id: 'pcB', type: 'pc', label: 'PC-B', x: 90, y: 320, ip: '192.168.1.11', mac: 'AA:AA:AA:AA:AA:11', gateway: '192.168.1.1', arpTable: {} },
+        { id: 'sw1', type: 'switch', label: 'SW1', x: 260, y: 240, macTable: {} },
+        {
+          id: 'rt1', type: 'router', label: 'RT1(NAT)', x: 430, y: 240, arpTable: {}, natTable: {}, natReverse: {}, nextPort: 40001,
+          interfaces: [
+            { ip: '192.168.1.1', mac: '44:44:44:44:44:01', side: 'private' },
+            { ip: '203.0.113.5', mac: '44:44:44:44:44:02', side: 'public' },
+          ],
+        },
+        { id: 'sw2', type: 'switch', label: 'SW2', x: 600, y: 240, macTable: {} },
+        { id: 'srv', type: 'server', label: '外部サーバー', x: 800, y: 240, ip: '8.8.8.8', mac: 'CC:CC:CC:CC:CC:88' },
+      ],
+      edges: [
+        { id: 'e1', a: 'pcA', b: 'sw1', connected: true },
+        { id: 'e2', a: 'pcB', b: 'sw1', connected: true },
+        { id: 'e3', a: 'sw1', b: 'rt1', connected: true },
+        { id: 'e4', a: 'rt1', b: 'sw2', connected: true },
+        { id: 'e5', a: 'sw2', b: 'srv', connected: true },
+      ],
+      runtime: { pcASuccess: false, pcBSuccess: false },
+    };
+  },
+  renderActions(container, state, api) {
+    const dev = (id) => state.devices.find((d) => d.id === id);
+    const mkBtn = (label, clientId, key) => {
+      const btn = document.createElement('button');
+      btn.textContent = label;
+      btn.addEventListener('click', () => {
+        runNatPing(state, api, {
+          client: dev(clientId), sw1: dev('sw1'), rt: dev('rt1'), sw2: dev('sw2'), server: dev('srv'),
+          onSuccess: () => {
+            state.stageRuntime[key] = true;
+            if (state.stageRuntime.pcASuccess && state.stageRuntime.pcBSuccess) {
+              api.setStatus('複数のPCが1つのグローバルIPを共有してインターネットに出られることを確認できました！', 'success');
+              api.completeStage();
+            }
+            api.render();
+          },
+        });
+      });
+      return btn;
+    };
+    container.appendChild(mkBtn('PC-Aからpingを送る', 'pcA', 'pcASuccess'));
+    container.appendChild(mkBtn('PC-Bからpingを送る', 'pcB', 'pcBSuccess'));
+  },
+};
+
+// ===================== ステージ15：ファイアウォール =====================
+
+const stage15 = {
+  id: 'stage15',
+  navLabel: '15. FW',
+  title: 'ステージ15：ファイアウォール',
+  missionText: 'ファイアウォールは、ポート番号ごとに通信を許可・遮断するルールを持つ。443番ポート（HTTPS）が遮断されているようだ。\nまず接続を試して失敗を確認し、ルールを直してからもう一度接続してみよう。',
+  revealFields: { ip: true, mac: true, ttl: false, port: true },
+  zones: [],
+  editableCables: false,
+  tablesToShow: [{ deviceId: 'fw1', kind: 'firewall', title: 'ファイアウォールのルール' }],
+  build() {
+    return {
+      devices: [
+        { id: 'pc', type: 'pc', label: 'PC', x: 150, y: 240, ip: '192.168.1.10', mac: 'AA:AA:AA:AA:AA:10' },
+        { id: 'fw1', type: 'firewall', label: 'FW1', x: 450, y: 240, mac: 'EE:EE:EE:EE:EE:01', rules: { 80: true, 443: false } },
+        { id: 'srv', type: 'server', label: 'Webサーバー', x: 750, y: 240, ip: '203.0.113.20', mac: 'CC:CC:CC:CC:CC:43' },
+      ],
+      edges: [
+        { id: 'e1', a: 'pc', b: 'fw1', connected: true },
+        { id: 'e2', a: 'fw1', b: 'srv', connected: true },
+      ],
+      runtime: { blockedObserved: false, fixedAndSucceeded: false },
+    };
+  },
+  renderActions(container, state, api) {
+    const dev = (id) => state.devices.find((d) => d.id === id);
+    const select = document.createElement('select');
+    select.appendChild(new Option('443 (HTTPS)', '443'));
+    select.appendChild(new Option('80 (HTTP)', '80'));
+    container.appendChild(labeledWrap('宛先ポート', select));
+
+    const connectBtn = document.createElement('button');
+    connectBtn.textContent = '接続する';
+    connectBtn.addEventListener('click', () => {
+      const client = dev('pc');
+      const fw = dev('fw1');
+      const server = dev('srv');
+      const port = Number(select.value);
+      api.log(`${client.label}が${server.ip}の${port}番ポートへ接続を試みます。`);
+      const frame = { type: 'TCP-SYN', srcMac: client.mac, dstMac: fw.mac, srcIp: client.ip, dstIp: server.ip, srcPort: 51000, dstPort: port };
+      const p1 = createPacket({
+        ...frame, fromId: client.id, toId: fw.id,
+        onArrive: (s) => {
+          if (!fw.rules[port]) {
+            api.log(`${fw.label}：${port}番ポート宛ての通信はルールで遮断されています。`, 'err');
+            state.stageRuntime.blockedObserved = true;
+            api.render();
+            return;
+          }
+          api.log(`${fw.label}：${port}番ポートは許可されているため通過させます。`, 'ok');
+          const p2 = createPacket({
+            ...frame, srcMac: fw.mac, fromId: fw.id, toId: server.id,
+            onArrive: (s2) => {
+              api.log(`${server.label}が接続を受け付けました。`, 'ok');
+              if (port === 443 && state.stageRuntime.blockedObserved) {
+                state.stageRuntime.fixedAndSucceeded = true;
+                api.setStatus('ファイアウォールのルールを直し、HTTPS接続を通せるようになりました！', 'success');
+                api.completeStage();
+              }
+              api.render();
+            },
+          });
+          s.packets.push(p2);
+          api.render();
+        },
+      });
+      state.packets.push(p1);
+      api.render();
+    });
+    container.appendChild(connectBtn);
+
+    const fixBtn = document.createElement('button');
+    fixBtn.className = 'secondary';
+    fixBtn.textContent = '443番ポートを許可するルールに直す';
+    fixBtn.addEventListener('click', () => {
+      dev('fw1').rules[443] = true;
+      api.log('ファイアウォールのルールを修正しました：443番ポートを許可。', 'ok');
+      api.render();
+    });
+    container.appendChild(fixBtn);
+  },
+};
+
+// ===================== ステージ16：障害調査モード =====================
+
+const stage16 = {
+  id: 'stage16',
+  navLabel: '16. 障害調査',
+  title: '障害調査モード：社員「インターネットが壊れました！」',
+  missionText: 'どこかの配線が切れているようだ。ネットワーク図をよく確認し、切れている配線を見つけて繋ぎ直してから「アクセスする」を押そう。\n（配線はクリックで抜き差しできる。ステージをリセットすると別の箇所が切れた状態になる）',
+  revealFields: { ip: true, mac: true, ttl: true, port: true },
+  zones: [
+    { x: 20, y: 100, w: 390, h: 300, color: 'blue', label: '社内LAN 192.168.1.0/24' },
+    { x: 440, y: 170, w: 400, h: 150, color: 'red', label: 'インターネット側 203.0.113.0/24' },
+  ],
+  editableCables: true,
+  tablesToShow: [
+    { deviceId: 'pc', kind: 'dns', title: 'PCのDNSキャッシュ' },
+    { deviceId: 'pc', kind: 'arp', title: 'PCのARPテーブル' },
+    { deviceId: 'rt1', kind: 'arp', title: 'ルーターのARPテーブル' },
+  ],
+  build() {
+    const edges = [
+      { id: 'e1', a: 'pc', b: 'sw1', connected: true },
+      { id: 'e2', a: 'dns', b: 'sw1', connected: true },
+      { id: 'e3', a: 'sw1', b: 'rt1', connected: true },
+      { id: 'e4', a: 'rt1', b: 'sw2', connected: true },
+      { id: 'e5', a: 'sw2', b: 'srv', connected: true },
+    ];
+    const brokenIndex = Math.floor(Math.random() * edges.length);
+    edges[brokenIndex].connected = false;
+    return {
+      devices: [
+        { id: 'pc', type: 'pc', label: 'PC', x: 90, y: 150, ip: '192.168.1.10', mac: 'AA:AA:AA:AA:AA:10', gateway: '192.168.1.1', arpTable: {}, dnsCache: {} },
+        { id: 'dns', type: 'server', label: 'DNSサーバー', x: 90, y: 350, ip: '192.168.1.53', mac: 'DD:DD:DD:DD:DD:53', records: { 'shop.example.com': '203.0.113.21' } },
+        { id: 'sw1', type: 'switch', label: 'SW1', x: 280, y: 240, macTable: {} },
+        {
+          id: 'rt1', type: 'router', label: 'RT1', x: 450, y: 240, arpTable: {},
+          interfaces: [
+            { ip: '192.168.1.1', mac: '55:55:55:55:55:01', side: 'blue' },
+            { ip: '203.0.113.1', mac: '55:55:55:55:55:02', side: 'red' },
+          ],
+        },
+        { id: 'sw2', type: 'switch', label: 'SW2', x: 630, y: 240, macTable: {} },
+        { id: 'srv', type: 'server', label: 'Web Server', x: 800, y: 240, ip: '203.0.113.21', mac: 'CC:CC:CC:CC:CC:21' },
+      ],
+      edges,
+      runtime: { success: false },
+    };
+  },
+  renderActions(container, state, api) {
+    const hint = document.createElement('span');
+    hint.style.cssText = 'font-size:12px;color:var(--text-dim);align-self:center;';
+    hint.textContent = '社員「shop.example.com が見られません！」原因を調査して復旧させよう。';
+    container.appendChild(hint);
+    const btn = document.createElement('button');
+    btn.textContent = 'アクセスする';
+    btn.addEventListener('click', () => {
+      const dev = (id) => state.devices.find((d) => d.id === id);
+      runWebMission(state, api, {
+        client: dev('pc'), sw1: dev('sw1'), dns: dev('dns'), rt: dev('rt1'), sw2: dev('sw2'), server: dev('srv'),
+        domain: 'shop.example.com',
+        onSuccess: () => {
+          state.stageRuntime.success = true;
+          api.setStatus('原因を特定して復旧し、無事にWebページが表示されました！', 'success');
+          api.completeStage();
+          api.render();
+        },
+      });
+    });
+    container.appendChild(btn);
+  },
+};
+
+export const STAGES = [
+  stage1, stage2, stage3, stage4, stage5, finalStage,
+  stage7, stage8, stage9, stage10, stage11,
+  stage12, stage13, stage14, stage15, stage16,
+];

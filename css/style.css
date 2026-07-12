@@ -325,6 +325,11 @@ body {
 .packet-dot.type-UDP-DATA { fill: #9aa6c4; }
 .packet-dot.type-HTTP-GET { fill: var(--accent); }
 .packet-dot.type-HTTP-RESPONSE { fill: #7fe0d6; }
+.packet-dot.type-TLS-CLIENTHELLO { fill: #ffcf5c; }
+.packet-dot.type-TLS-SERVERHELLO { fill: #c58fff; }
+.packet-dot.type-TLS-KEYEXCHANGE { fill: #ff8fab; }
+.packet-dot.type-TLS-FINISHED { fill: var(--ok); }
+.packet-dot.type-TLS-APPDATA { fill: #7fe0d6; }
 .packet-dot.selected { stroke: #fff; stroke-width: 3; }
 
 .packet-label {

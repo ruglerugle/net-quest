@@ -15,6 +15,7 @@ const DEVICE_SIZE = {
   server: { w: 92, h: 60 },
   switch: { w: 84, h: 44 },
   router: { w: 64, h: 64 },
+  firewall: { w: 64, h: 64 },
 };
 
 function deviceLabelSub(device, revealFields) {
@@ -96,7 +97,7 @@ export function renderNetwork(state, handlers) {
     const g = svgEl('g', {});
 
     let shape;
-    if (device.type === 'router') {
+    if (device.type === 'router' || device.type === 'firewall') {
       shape = svgEl('circle', { cx: device.x, cy: device.y, r: size.w / 2, class: 'device-box' });
     } else {
       shape = svgEl('rect', {
@@ -176,6 +177,16 @@ export function renderTables(state) {
         (entries.length
           ? entries.map(([domain, ip]) => `<tr><td>${escapeHtml(domain)}</td><td>${escapeHtml(ip)}</td></tr>`).join('')
           : '<tr><td colspan="2" style="color:var(--text-dim)">まだキャッシュがありません</td></tr>');
+    } else if (spec.kind === 'nat') {
+      const entries = Object.entries(device.natTable ?? {});
+      table.innerHTML = '<tr><th>内部(IP:ポート)</th><th>グローバル(IP:ポート)</th></tr>' +
+        (entries.length
+          ? entries.map(([inside, port]) => `<tr><td>${escapeHtml(inside)}</td><td>${escapeHtml(device.interfaces.find((i) => i.side === 'public').ip)}:${port}</td></tr>`).join('')
+          : '<tr><td colspan="2" style="color:var(--text-dim)">まだ変換していません</td></tr>');
+    } else if (spec.kind === 'firewall') {
+      const entries = Object.entries(device.rules ?? {});
+      table.innerHTML = '<tr><th>ポート</th><th>ルール</th></tr>' +
+        entries.map(([port, allow]) => `<tr><td>${escapeHtml(port)}</td><td>${allow ? '許可' : '<span style="color:var(--danger)">遮断</span>'}</td></tr>`).join('');
     }
     box.appendChild(table);
   }

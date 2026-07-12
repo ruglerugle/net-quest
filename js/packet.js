@@ -26,6 +26,10 @@ export function createPacket(opts) {
     ack: opts.ack ?? null,
     arpQueryIp: opts.arpQueryIp ?? null,
     queryDomain: opts.queryDomain ?? null,
+    certSubject: opts.certSubject ?? null,
+    certIssuer: opts.certIssuer ?? null,
+    certValidUntil: opts.certValidUntil ?? null,
+    requestedDomain: opts.requestedDomain ?? null,
     data: opts.data ?? null,
     note: opts.note ?? null,
     dstMacTag: opts.dstMacTag ?? null,
@@ -88,6 +92,11 @@ const TYPE_LABEL = {
   'UDP-DATA': 'UDPデータ',
   'HTTP-GET': 'HTTP GETリクエスト',
   'HTTP-RESPONSE': 'HTTP レスポンス',
+  'TLS-CLIENTHELLO': 'TLS ClientHello',
+  'TLS-SERVERHELLO': 'TLS ServerHello + 証明書',
+  'TLS-KEYEXCHANGE': 'TLS 鍵交換',
+  'TLS-FINISHED': 'TLS Finished',
+  'TLS-APPDATA': 'TLS 暗号化データ',
 };
 
 /**
@@ -117,6 +126,10 @@ export function packetDetailRows(packet, reveal, resolveLabel) {
   if (reveal.ttl && packet.ttl != null) rows.push({ k: 'TTL', v: packet.ttl });
   if (packet.arpQueryIp) rows.push({ k: '問い合わせ先IP', v: packet.arpQueryIp });
   if (packet.queryDomain) rows.push({ k: '問い合わせドメイン', v: packet.queryDomain });
+  if (packet.requestedDomain) rows.push({ k: 'アクセス先ドメイン', v: packet.requestedDomain });
+  if (packet.certSubject) rows.push({ k: '証明書の発行対象', v: packet.certSubject });
+  if (packet.certIssuer) rows.push({ k: '証明書の発行者', v: packet.certIssuer });
+  if (packet.certValidUntil) rows.push({ k: '証明書の有効期限', v: packet.certValidUntil });
   if (packet.data) rows.push({ k: 'データ', v: packet.data });
   if (packet.note) rows.push({ k: 'メモ', v: packet.note });
   return rows;
