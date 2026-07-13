@@ -196,7 +196,7 @@ export function renderPacketDetail(state) {
   const box = document.getElementById('packet-detail');
   const packet = state.packets.find((p) => p.id === state.selectedPacketId);
   if (!packet) {
-    box.innerHTML = '<p class="hint">パケットをクリックすると中身が見られます</p>';
+    box.innerHTML = '<p class="hint">一時停止してパケットをクリックすると中身が見られます</p>';
     return;
   }
   const rows = packetDetailRows(packet, state.stageDef.revealFields, (id) => resolveLabel(state, id));
