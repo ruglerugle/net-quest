@@ -324,32 +324,12 @@ body {
   stroke-width: 22;
   cursor: pointer;
 }
-.edge-hit-area:hover + .edge-line { stroke: var(--accent); }
 .edge-break {
   fill: var(--danger);
   font-size: 16px;
   font-weight: bold;
   text-anchor: middle;
   pointer-events: none;
-}
-.edge-plug-btn {
-  fill: var(--ok);
-  stroke: #fff;
-  stroke-width: 2.5;
-  cursor: pointer;
-  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, .25));
-}
-.edge-plug-btn.disconnected {
-  fill: var(--danger);
-}
-.edge-plug-btn:hover {
-  stroke: #ffd44a;
-}
-.edge-plug-icon {
-  fill: #fff;
-  font-size: 15px;
-  font-weight: 900;
-  text-anchor: middle;
 }
 
 .subnet-zone {
