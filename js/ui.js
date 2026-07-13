@@ -59,7 +59,7 @@ export function renderNetwork(state, handlers) {
       class: `edge-line${edge.connected ? '' : ' disconnected'}`,
     });
     svg.appendChild(line);
-    if (!edge.connected) {
+    if (!edge.connected && !state.stageDef.editableCables) {
       const mx = (a.x + b.x) / 2;
       const my = (a.y + b.y) / 2;
       const brk = svgEl('text', { x: mx, y: my + 5, class: 'edge-break' });
@@ -74,6 +74,20 @@ export function renderNetwork(state, handlers) {
       });
       hitArea.addEventListener('click', () => handlers.onEdgeClick(edge.id));
       svg.appendChild(hitArea);
+
+      // どこが押せるのか一目で分かるよう、線の中央に大きな丸ボタンを表示する
+      const mx = (a.x + b.x) / 2;
+      const my = (a.y + b.y) / 2;
+      const plugBtn = svgEl('circle', {
+        cx: mx, cy: my, r: 15,
+        class: `edge-plug-btn${edge.connected ? '' : ' disconnected'}`,
+      });
+      plugBtn.addEventListener('click', () => handlers.onEdgeClick(edge.id));
+      svg.appendChild(plugBtn);
+      const plugIcon = svgEl('text', { x: mx, y: my + 5, class: 'edge-plug-icon' });
+      plugIcon.textContent = edge.connected ? '⏻' : '⏼';
+      plugIcon.setAttribute('pointer-events', 'none');
+      svg.appendChild(plugIcon);
     }
   }
 
