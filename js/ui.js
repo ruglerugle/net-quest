@@ -308,10 +308,17 @@ export function renderStageNav(stages, state, onSelect) {
   });
 }
 
+let liveBuffer = [];
+let lastLogTime = 0;
+const LIVE_BATCH_GAP_MS = 200; // これより間が空いたら新しいまとまりとして扱う
+const LIVE_MAX_LINES = 5;
+
 export function clearLog() {
   document.getElementById('log-list').innerHTML = '';
+  liveBuffer = [];
+  lastLogTime = 0;
   const live = document.getElementById('live-status');
-  live.textContent = '';
+  live.innerHTML = '';
   live.className = '';
 }
 
@@ -324,10 +331,23 @@ export function appendLog(message, cls) {
   const panel = document.getElementById('log-panel');
   panel.scrollTop = panel.scrollHeight;
 
-  // アニメーション枠内にも最新のログをリアルタイムで表示する
+  // アニメーション枠内にも、同時に起きた出来事はまとめてリアルタイム表示する。
+  // 1回の描画更新の中で複数のログが同時に発生することがある（例：フラッディングで
+  // 複数のPCが同時に受信/破棄する）ため、最後の1行だけに上書きしてしまわないよう、
+  // 短い間隔（LIVE_BATCH_GAP_MS）で連続しているログはまとめてバッファに積む。
+  const now = performance.now();
+  if (now - lastLogTime > LIVE_BATCH_GAP_MS) {
+    liveBuffer = [];
+  }
+  lastLogTime = now;
+  liveBuffer.push({ message, cls });
+  if (liveBuffer.length > LIVE_MAX_LINES) liveBuffer.shift();
+
   const live = document.getElementById('live-status');
-  live.textContent = message;
-  live.className = `show${cls ? ` ${cls}` : ''}`;
+  live.innerHTML = liveBuffer
+    .map((l) => `<div class="live-line${l.cls ? ` ${l.cls}` : ''}">${escapeHtml(l.message)}</div>`)
+    .join('');
+  live.className = 'show';
 }
 
 export function renderStageActions(container, stageDef, state, api) {

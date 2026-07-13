@@ -135,7 +135,7 @@ body {
   left: 14px;
   right: 14px;
   bottom: 14px;
-  padding: 9px 14px;
+  padding: 8px 14px;
   border-radius: 8px;
   font-size: 13px;
   font-weight: 800;
@@ -151,9 +151,13 @@ body {
   opacity: 1;
   transform: translateY(0);
 }
-#live-status.err { background: rgba(214, 30, 30, 0.92); }
-#live-status.ok { background: rgba(23, 140, 82, 0.92); }
-#live-status.arp { background: rgba(184, 122, 20, 0.92); }
+.live-line {
+  padding: 1px 0;
+  line-height: 1.5;
+}
+.live-line.err { color: #ff9d9d; }
+.live-line.ok { color: #83edb3; }
+.live-line.arp { color: #ffd97a; }
 
 #stage-actions {
   display: flex;
