@@ -198,6 +198,36 @@ export function renderMissionBanner(stageDef) {
   setMissionStatus('', '');
 }
 
+const CHAR_IMAGES = {
+  cat: 'images/cat.png',
+  catThink: 'images/catThink.png',
+  rabbit: 'images/rabbit.png',
+  rabbitThink: 'images/rabbitThink.png',
+};
+
+function characterCard(who, variant) {
+  const isCat = who === 'cat';
+  const src = isCat
+    ? (variant === 'think' ? CHAR_IMAGES.catThink : CHAR_IMAGES.cat)
+    : (variant === 'think' ? CHAR_IMAGES.rabbitThink : CHAR_IMAGES.rabbit);
+  const name = isCat ? 'ねこ先生' : 'うさ美（生徒）';
+  const cls = isCat ? 'cat' : 'rabbit';
+  return `<div class="dialog-character"><img src="${src}" alt="${name}"><div class="dialog-name ${cls}">${name}</div></div>`;
+}
+
+function dialogueLine(who, text, variant) {
+  const side = who === 'rabbit' ? ' right' : '';
+  return `<div class="dialog-row${side}">${characterCard(who, variant)}<div class="dialog-bubble">${text}</div></div>`;
+}
+
+export function renderDialogue(stageDef) {
+  const box = document.getElementById('dialogue-panel');
+  const lines = stageDef.dialogue ?? [];
+  box.innerHTML = lines.length
+    ? `<div class="dialog-scene">${lines.map((l) => dialogueLine(l.who, l.text, l.variant ?? '')).join('')}</div>`
+    : '';
+}
+
 export function setMissionStatus(text, cls) {
   const el = document.getElementById('mission-status');
   el.textContent = text;

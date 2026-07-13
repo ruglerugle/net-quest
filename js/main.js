@@ -65,6 +65,7 @@ function loadStage(index) {
   gameState.completed = false;
 
   ui.clearLog();
+  ui.renderDialogue(def);
   ui.renderMissionBanner(def);
   ui.renderStageNav(STAGES, gameState, loadStage);
   ui.renderStageActions(document.getElementById('stage-actions'), def, gameState, API);
