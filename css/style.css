@@ -311,6 +311,17 @@ body {
   text-anchor: middle;
   font-family: "Consolas", monospace;
 }
+.device-icon {
+  fill: none;
+  stroke: var(--text);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.device-icon.filled {
+  fill: var(--text);
+  stroke: none;
+}
 .edge-line {
   stroke: var(--border);
   stroke-width: 3;

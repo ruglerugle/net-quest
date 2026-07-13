@@ -11,12 +11,46 @@ function svgEl(tag, attrs = {}) {
 }
 
 const DEVICE_SIZE = {
-  pc: { w: 78, h: 52 },
-  server: { w: 92, h: 60 },
-  switch: { w: 84, h: 44 },
-  router: { w: 64, h: 64 },
-  firewall: { w: 64, h: 64 },
+  pc: { w: 78, h: 58 },
+  server: { w: 92, h: 66 },
+  switch: { w: 84, h: 50 },
+  router: { w: 72, h: 72 },
+  firewall: { w: 72, h: 72 },
 };
+
+/** デバイス種別ごとの簡易ラインアートアイコンを (cx, cy) を中心に描画する */
+function appendDeviceIcon(g, type, cx, cy) {
+  const icon = (tag, attrs) => g.appendChild(svgEl(tag, { class: 'device-icon', ...attrs }));
+  if (type === 'pc') {
+    icon('rect', { x: cx - 13, y: cy - 10, width: 26, height: 16, rx: 2 });
+    icon('line', { x1: cx, y1: cy + 6, x2: cx, y2: cy + 10 });
+    icon('line', { x1: cx - 8, y1: cy + 10, x2: cx + 8, y2: cy + 10 });
+  } else if (type === 'switch') {
+    icon('rect', { x: cx - 15, y: cy - 8, width: 30, height: 14, rx: 2 });
+    for (let i = 0; i < 4; i += 1) {
+      icon('rect', { x: cx - 11.5 + i * 7.3, y: cy + 1.5, width: 4, height: 3.5, class: 'device-icon filled' });
+    }
+  } else if (type === 'router') {
+    icon('circle', { cx, cy: cy + 8, r: 1.8, class: 'device-icon filled' });
+    icon('path', { d: `M ${cx - 3} ${cy + 3} A 5 5 0 0 1 ${cx + 3} ${cy + 3}` });
+    icon('path', { d: `M ${cx - 6.5} ${cy - 1} A 10 10 0 0 1 ${cx + 6.5} ${cy - 1}` });
+    icon('path', { d: `M ${cx - 10} ${cy - 5} A 15 15 0 0 1 ${cx + 10} ${cy - 5}` });
+  } else if (type === 'firewall') {
+    icon('rect', { x: cx - 13, y: cy - 9, width: 12, height: 7 });
+    icon('rect', { x: cx + 1, y: cy - 9, width: 12, height: 7 });
+    icon('rect', { x: cx - 13, y: cy - 1, width: 5, height: 7 });
+    icon('rect', { x: cx - 7, y: cy - 1, width: 12, height: 7 });
+    icon('rect', { x: cx + 8, y: cy - 1, width: 5, height: 7 });
+  } else {
+    // server / dhcp / dns 等
+    icon('rect', { x: cx - 13, y: cy - 11, width: 26, height: 22, rx: 2 });
+    icon('line', { x1: cx - 13, y1: cy - 3.7, x2: cx + 13, y2: cy - 3.7 });
+    icon('line', { x1: cx - 13, y1: cy + 3.7, x2: cx + 13, y2: cy + 3.7 });
+    icon('circle', { cx: cx - 9, cy: cy - 7.3, r: 1.1, class: 'device-icon filled' });
+    icon('circle', { cx: cx - 9, cy: cy, r: 1.1, class: 'device-icon filled' });
+    icon('circle', { cx: cx - 9, cy: cy + 7.3, r: 1.1, class: 'device-icon filled' });
+  }
+}
 
 function deviceLabelSub(device, revealFields) {
   if (!revealFields.ip) return [];
@@ -107,13 +141,17 @@ export function renderNetwork(state, handlers) {
     }
     g.appendChild(shape);
 
-    const label = svgEl('text', { x: device.x, y: device.y - 2, class: 'device-label' });
+    const iconOffset = device.type === 'router' || device.type === 'firewall' ? 0.16 : 0.22;
+    appendDeviceIcon(g, device.type, device.x, device.y - size.h * iconOffset);
+
+    const labelY = device.y + size.h * 0.16;
+    const label = svgEl('text', { x: device.x, y: labelY, class: 'device-label' });
     label.textContent = device.label;
     g.appendChild(label);
 
     const subLines = deviceLabelSub(device, reveal);
     subLines.forEach((line, i) => {
-      const t = svgEl('text', { x: device.x, y: device.y + 14 + i * 12, class: 'device-sub' });
+      const t = svgEl('text', { x: device.x, y: labelY + 12 + i * 12, class: 'device-sub' });
       t.textContent = line;
       g.appendChild(t);
     });
