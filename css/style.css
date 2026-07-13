@@ -384,10 +384,15 @@ body {
   stroke: none;
 }
 
+.packet-hit-area {
+  fill: transparent;
+  cursor: pointer;
+}
 .packet-dot {
   cursor: pointer;
   stroke: #172235;
   stroke-width: 1.5;
+  pointer-events: none;
 }
 .packet-dot.type-DATA { fill: #6b7a90; }
 .packet-dot.type-ARP-REQUEST { fill: var(--warn); }

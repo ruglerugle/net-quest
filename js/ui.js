@@ -168,13 +168,18 @@ function renderPacketsInto(layer, state, handlers) {
     const x = a.x + (b.x - a.x) * packet.progress;
     const y = a.y + (b.y - a.y) * packet.progress;
     const selected = state.selectedPacketId === packet.id;
+    const onClick = (ev) => {
+      ev.stopPropagation();
+      handlers.onPacketClick(packet.id);
+    };
+    // 見た目のドット（半径9px）は動いていると狙ってクリックしづらいので、
+    // 太い透明な当たり判定を下に重ねてクリックしやすくする（配線のときと同じ考え方）。
+    const hitArea = svgEl('circle', { cx: x, cy: y, r: 18, class: 'packet-hit-area' });
+    hitArea.addEventListener('click', onClick);
+    layer.appendChild(hitArea);
     const dot = svgEl('circle', {
       cx: x, cy: y, r: 9,
       class: `packet-dot type-${packet.type}${selected ? ' selected' : ''}`,
-    });
-    dot.addEventListener('click', (ev) => {
-      ev.stopPropagation();
-      handlers.onPacketClick(packet.id);
     });
     layer.appendChild(dot);
   }
