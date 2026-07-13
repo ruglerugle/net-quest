@@ -84,8 +84,22 @@ function loadStage(index) {
 document.getElementById('btn-play').addEventListener('click', () => { gameState.playing = true; });
 document.getElementById('btn-pause').addEventListener('click', () => { gameState.playing = false; });
 document.getElementById('btn-step').addEventListener('click', () => {
-  stepPackets(gameState, 0.2, gameState.speed);
-  renderPacketsOnly();
+  if (gameState.packets.length === 0) {
+    ui.appendLog('今は動いているパケットがありません。まず操作パネルのボタンでパケットを送ってみましょう。', 'err');
+    return;
+  }
+  // 「1ステップ」＝今動いているパケットのうち、どれか1つが次の出来事
+  // （到着・落下）を迎えるまで進める。固定の短い時間だけ進めると変化が
+  // 小さすぎて分かりにくいため、細かく進め続けて変化を検知する。
+  // 到着後すぐ次のホップへ中継されるケース（スイッチ経由など）でも
+  // 正しく「1回分」で止められるよう、個数ではなく元のパケットIDで判定する。
+  const startIds = new Set(gameState.packets.map((p) => p.id));
+  for (let i = 0; i < 120; i += 1) {
+    stepPackets(gameState, 0.05, gameState.speed);
+    renderPacketsOnly();
+    const anyOriginalGone = [...startIds].some((id) => !gameState.packets.some((p) => p.id === id));
+    if (anyOriginalGone) break;
+  }
 });
 document.getElementById('speed-slider').addEventListener('input', (ev) => {
   gameState.speed = parseFloat(ev.target.value);
