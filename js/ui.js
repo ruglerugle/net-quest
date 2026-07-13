@@ -58,9 +58,6 @@ export function renderNetwork(state, handlers) {
       x1: a.x, y1: a.y, x2: b.x, y2: b.y,
       class: `edge-line${edge.connected ? '' : ' disconnected'}`,
     });
-    if (state.stageDef.editableCables) {
-      line.addEventListener('click', () => handlers.onEdgeClick(edge.id));
-    }
     svg.appendChild(line);
     if (!edge.connected) {
       const mx = (a.x + b.x) / 2;
@@ -68,6 +65,15 @@ export function renderNetwork(state, handlers) {
       const brk = svgEl('text', { x: mx, y: my + 5, class: 'edge-break' });
       brk.textContent = '✕';
       svg.appendChild(brk);
+    }
+    if (state.stageDef.editableCables) {
+      // 見た目の線（3px）はクリックしにくいので、太い透明な当たり判定を一番上に重ねる
+      const hitArea = svgEl('line', {
+        x1: a.x, y1: a.y, x2: b.x, y2: b.y,
+        class: 'edge-hit-area',
+      });
+      hitArea.addEventListener('click', () => handlers.onEdgeClick(edge.id));
+      svg.appendChild(hitArea);
     }
   }
 

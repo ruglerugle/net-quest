@@ -314,18 +314,23 @@ body {
 .edge-line {
   stroke: var(--border);
   stroke-width: 3;
-  cursor: pointer;
 }
 .edge-line.disconnected {
   stroke: var(--danger);
   stroke-dasharray: 6 6;
 }
-.edge-line:hover { stroke: var(--accent); }
+.edge-hit-area {
+  stroke: transparent;
+  stroke-width: 22;
+  cursor: pointer;
+}
+.edge-hit-area:hover + .edge-line { stroke: var(--accent); }
 .edge-break {
   fill: var(--danger);
   font-size: 16px;
   font-weight: bold;
   text-anchor: middle;
+  pointer-events: none;
 }
 
 .subnet-zone {
