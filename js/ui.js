@@ -91,23 +91,13 @@ export function renderNetwork(state, handlers) {
     }
   }
 
-  // 3. パケット
-  for (const packet of state.packets) {
-    const a = state.devices.find((d) => d.id === packet.fromId);
-    const b = state.devices.find((d) => d.id === packet.toId);
-    const x = a.x + (b.x - a.x) * packet.progress;
-    const y = a.y + (b.y - a.y) * packet.progress;
-    const selected = state.selectedPacketId === packet.id;
-    const dot = svgEl('circle', {
-      cx: x, cy: y, r: 9,
-      class: `packet-dot type-${packet.type}${selected ? ' selected' : ''}`,
-    });
-    dot.addEventListener('click', (ev) => {
-      ev.stopPropagation();
-      handlers.onPacketClick(packet.id);
-    });
-    svg.appendChild(dot);
-  }
+  // 3. パケット層（アニメーション中は毎フレーム更新されるので、配線やボタンとは
+  //    独立したグループにしておく。svg.innerHTML='' で全体を作り直すと、
+  //    クリック操作の途中（mousedown〜click）で当該要素ごと消えてしまい、
+  //    クリックが反応しないことがあるため。
+  const packetsLayer = svgEl('g', { id: 'packets-layer' });
+  svg.appendChild(packetsLayer);
+  renderPacketsInto(packetsLayer, state, handlers);
 
   // 4. デバイス
   for (const device of state.devices) {
@@ -144,6 +134,33 @@ export function renderNetwork(state, handlers) {
 
     svg.appendChild(g);
   }
+}
+
+function renderPacketsInto(layer, state, handlers) {
+  layer.innerHTML = '';
+  for (const packet of state.packets) {
+    const a = state.devices.find((d) => d.id === packet.fromId);
+    const b = state.devices.find((d) => d.id === packet.toId);
+    const x = a.x + (b.x - a.x) * packet.progress;
+    const y = a.y + (b.y - a.y) * packet.progress;
+    const selected = state.selectedPacketId === packet.id;
+    const dot = svgEl('circle', {
+      cx: x, cy: y, r: 9,
+      class: `packet-dot type-${packet.type}${selected ? ' selected' : ''}`,
+    });
+    dot.addEventListener('click', (ev) => {
+      ev.stopPropagation();
+      handlers.onPacketClick(packet.id);
+    });
+    layer.appendChild(dot);
+  }
+}
+
+/** アニメーションフレームごとの軽量更新。パケット層だけを差し替え、配線・ボタン・デバイスは触らない。 */
+export function renderPacketsOnly(state, handlers) {
+  const layer = document.getElementById('packets-layer');
+  if (!layer) return;
+  renderPacketsInto(layer, state, handlers);
 }
 
 export function renderPacketDetail(state) {

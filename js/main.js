@@ -23,6 +23,15 @@ function render() {
   ui.renderTables(gameState);
 }
 
+// パケットのアニメーションだけを進める軽量更新（配線・ボタン・デバイスは再構築しない）。
+// render() で毎フレーム svg.innerHTML を丸ごと作り直すと、ユーザーがボタンを
+// クリックしている最中（mousedown〜click の間）に要素ごと消えてしまい、
+// クリックが反応しないことがあったため分離した。
+function renderPacketsOnly() {
+  ui.renderPacketsOnly(gameState, { onPacketClick });
+  ui.renderPacketDetail(gameState);
+}
+
 function onPacketClick(packetId) {
   gameState.selectedPacketId = packetId;
   render();
@@ -76,7 +85,7 @@ document.getElementById('btn-play').addEventListener('click', () => { gameState.
 document.getElementById('btn-pause').addEventListener('click', () => { gameState.playing = false; });
 document.getElementById('btn-step').addEventListener('click', () => {
   stepPackets(gameState, 0.2, gameState.speed);
-  render();
+  renderPacketsOnly();
 });
 document.getElementById('speed-slider').addEventListener('input', (ev) => {
   gameState.speed = parseFloat(ev.target.value);
@@ -93,7 +102,7 @@ setInterval(() => {
   lastTick = now;
   if (gameState.playing) {
     stepPackets(gameState, dt, gameState.speed);
-    render();
+    renderPacketsOnly();
   }
 }, 33);
 
