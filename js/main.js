@@ -108,7 +108,10 @@ document.getElementById('btn-reset').addEventListener('click', () => {
   loadStage(gameState.stageIndex);
 });
 
-// 非表示タブでのスロットリングを避けるため setInterval を使用（rAFはバックグラウンドで停止しうる）
+// 非表示タブでのスロットリングを避けるため setInterval を使用（rAFはバックグラウンドで停止しうる）。
+// 画面のリフレッシュレート(60Hz)に対して更新が33ms(約30fps)おきだと、同じ位置が
+// 2フレーム続けて描画されてから次の位置へ飛ぶため、動きが「カクカク」して見える。
+// 16ms(約60fps)にして滑らかにする。
 let lastTick = performance.now();
 setInterval(() => {
   const now = performance.now();
@@ -118,6 +121,6 @@ setInterval(() => {
     stepPackets(gameState, dt, gameState.speed);
     renderPacketsOnly();
   }
-}, 33);
+}, 16);
 
 loadStage(0);
