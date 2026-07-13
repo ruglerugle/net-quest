@@ -115,14 +115,45 @@ body {
   min-width: 0;
 }
 
+#svg-wrap {
+  position: relative;
+  flex: 1;
+  min-height: 360px;
+  display: flex;
+}
+
 #network-svg {
   width: 100%;
   flex: 1;
-  min-height: 360px;
   background: var(--panel-2);
   border: 1px solid var(--border);
   border-radius: 8px;
 }
+
+#live-status {
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  bottom: 14px;
+  padding: 9px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 800;
+  color: #fff;
+  background: rgba(23, 34, 53, 0.88);
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+}
+#live-status.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+#live-status.err { background: rgba(214, 30, 30, 0.92); }
+#live-status.ok { background: rgba(23, 140, 82, 0.92); }
+#live-status.arp { background: rgba(184, 122, 20, 0.92); }
 
 #stage-actions {
   display: flex;
@@ -194,7 +225,7 @@ body {
   #app-main {
     flex-direction: column;
   }
-  #network-svg { min-height: 260px; }
+  #svg-wrap { min-height: 260px; }
   #side-panel { width: auto; }
   #stage-actions button,
   #stage-actions select,
@@ -203,6 +234,7 @@ body {
   }
   #control-bar { padding: 8px 12px; }
   #log-panel { padding: 8px 12px; height: 110px; }
+  #live-status { left: 8px; right: 8px; bottom: 8px; font-size: 12px; padding: 7px 10px; }
 }
 
 #packet-detail-box, #table-views {

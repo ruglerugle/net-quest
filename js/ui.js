@@ -310,6 +310,9 @@ export function renderStageNav(stages, state, onSelect) {
 
 export function clearLog() {
   document.getElementById('log-list').innerHTML = '';
+  const live = document.getElementById('live-status');
+  live.textContent = '';
+  live.className = '';
 }
 
 export function appendLog(message, cls) {
@@ -320,6 +323,11 @@ export function appendLog(message, cls) {
   list.appendChild(li);
   const panel = document.getElementById('log-panel');
   panel.scrollTop = panel.scrollHeight;
+
+  // アニメーション枠内にも最新のログをリアルタイムで表示する
+  const live = document.getElementById('live-status');
+  live.textContent = message;
+  live.className = `show${cls ? ` ${cls}` : ''}`;
 }
 
 export function renderStageActions(container, stageDef, state, api) {
