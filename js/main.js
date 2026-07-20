@@ -107,6 +107,9 @@ document.getElementById('speed-slider').addEventListener('input', (ev) => {
 document.getElementById('btn-reset').addEventListener('click', () => {
   loadStage(gameState.stageIndex);
 });
+document.getElementById('sidebar-toggle').addEventListener('click', () => {
+  document.getElementById('stage-sidebar').classList.toggle('hidden');
+});
 
 // 非表示タブでのスロットリングを避けるため setInterval を使用（rAFはバックグラウンドで停止しうる）。
 // 画面のリフレッシュレート(60Hz)に対して更新が33ms(約30fps)おきだと、同じ位置が
