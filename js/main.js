@@ -107,9 +107,11 @@ document.getElementById('speed-slider').addEventListener('input', (ev) => {
 document.getElementById('btn-reset').addEventListener('click', () => {
   loadStage(gameState.stageIndex);
 });
-document.getElementById('sidebar-toggle').addEventListener('click', () => {
+function toggleSidebar() {
   document.getElementById('game-layout').classList.toggle('nav-collapsed');
-});
+}
+document.getElementById('sidebar-toggle').addEventListener('click', toggleSidebar);
+document.getElementById('head-nav-toggle').addEventListener('click', toggleSidebar);
 document.getElementById('side-backdrop').addEventListener('click', () => {
   document.getElementById('game-layout').classList.add('nav-collapsed');
 });

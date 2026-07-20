@@ -45,97 +45,121 @@ body {
 #app-header .subtitle { font-size: 13px; color: #fff; font-weight: 700; }
 #app-header .subtitle::before { content: "🐾 "; }
 
+/* ── Layout (cpu_questと同一構造) ── */
+.head-btn {
+  height: 40px;
+  padding: 0 16px;
+  border: 2px solid rgba(255, 255, 255, .78);
+  border-radius: 9px;
+  background: rgba(0, 0, 0, .18);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 2px 0 rgba(0, 0, 0, .26);
+  touch-action: manipulation;
+  margin-left: auto;
+}
+.head-btn:hover { background: rgba(255, 255, 255, .15); }
+
 #game-layout {
-  display: flex;
-  gap: 12px;
-  align-items: flex-start;
+  display: grid;
+  grid-template-columns: 230px minmax(0, 1fr);
+  gap: 14px;
   flex: 1;
   min-height: 0;
+  transition: grid-template-columns .25s ease;
 }
 
+/* ── Side panel ── */
 #stage-sidebar {
-  width: 230px;
-  flex-shrink: 0;
-  position: sticky;
-  top: 10px;
   background: linear-gradient(180deg, rgba(39, 55, 64, .96), rgba(23, 38, 48, .98));
+  position: sticky;
+  top: 8px;
+  align-self: start;
   border: 1px solid rgba(255, 255, 255, .22);
-  border-radius: 12px;
-  box-shadow: var(--shadow);
+  border-radius: 8px;
+  box-shadow: 0 18px 45px rgba(0, 0, 0, .35);
+  padding: 0;
   color: #fff;
   overflow: hidden;
   transition: width .25s ease;
 }
-#game-layout.nav-collapsed #stage-sidebar { width: 56px; }
-#game-layout.nav-collapsed .side-head { justify-content: center; padding: 10px 6px; }
-#game-layout.nav-collapsed .side-head-text { display: none; }
-#game-layout.nav-collapsed .side-step { justify-content: center; padding: 10px 4px; }
-#game-layout.nav-collapsed .side-step .side-step-label,
-#game-layout.nav-collapsed .side-step .status-icon { display: none; }
-
-/* 幅901px以上ではサイドバーを常にフル表示にする(折りたたみ操作は無効化) */
-@media (min-width: 901px) {
-  #game-layout.nav-collapsed #stage-sidebar { width: 230px !important; }
-  #game-layout.nav-collapsed .side-head { justify-content: space-between !important; padding: 10px 10px 10px 14px !important; }
-  #game-layout.nav-collapsed .side-head-text { display: block !important; }
-  #game-layout.nav-collapsed .side-step { justify-content: flex-start !important; padding: 10px 14px !important; }
-  #game-layout.nav-collapsed .side-step .side-step-label,
-  #game-layout.nav-collapsed .side-step .status-icon { display: block !important; }
-}
-#stage-sidebar .side-head {
+.side-head {
+  font-size: 14px;
+  font-weight: 900;
+  color: #dbe8f3;
+  padding: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, .18);
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 8px;
-  font-size: 13px;
-  font-weight: 900;
-  color: #ffdf5a;
-  padding: 10px 10px 10px 14px;
-  border-bottom: 1px solid rgba(255, 255, 255, .18);
+  min-height: 48px;
 }
-
+.side-head-text { white-space: nowrap; }
 #sidebar-toggle {
-  background: rgba(255, 255, 255, .10);
-  border: 1px solid rgba(255, 255, 255, .28);
-  color: #fff;
-  width: 32px;
+  width: 36px;
   height: 32px;
+  border: 1px solid rgba(255, 255, 255, .28);
   border-radius: 7px;
-  font-size: 16px;
-  line-height: 1;
+  background: rgba(255, 255, 255, .10);
+  color: #fff;
+  font-weight: 950;
+  font-size: 18px;
   cursor: pointer;
+  line-height: 1;
   flex-shrink: 0;
 }
-#sidebar-toggle:hover { background: rgba(255, 255, 255, .18); }
+#side-backdrop { display: none; }
 
-#stage-nav {
-  display: flex;
-  flex-direction: column;
-  max-height: 74vh;
-  overflow-y: auto;
-}
-
+/* Step list in sidebar */
+#stage-nav { display: flex; flex-direction: column; }
 .side-step {
-  display: flex;
+  display: grid;
+  grid-template-columns: 28px 1fr 20px;
+  gap: 6px;
   align-items: center;
-  gap: 10px;
-  padding: 10px 14px;
+  min-height: 64px;
+  padding: 8px 10px;
   border: none;
-  border-bottom: 1px solid rgba(255, 255, 255, .10);
-  cursor: pointer;
+  border-bottom: 1px solid rgba(255, 255, 255, .18);
   color: #cbd6de;
+  position: relative;
+  cursor: pointer;
+  user-select: none;
+  touch-action: manipulation;
   background: none;
   text-align: left;
   font-family: inherit;
   width: 100%;
 }
 .side-step:hover { background: rgba(255, 255, 255, .07); }
-.side-step .paw { font-size: 15px; flex-shrink: 0; width: 18px; text-align: center; }
-.side-step .side-step-label { flex: 1; font-size: 13px; font-weight: 700; line-height: 1.3; }
-.side-step .status-icon { font-size: 13px; flex-shrink: 0; }
-.side-step.active { background: rgba(9, 22, 31, .6); outline: 2px solid #ffd44a; outline-offset: -2px; color: #fff; }
+.side-step .paw { font-size: 18px; text-align: center; color: #9ba7ad; }
+.side-step .side-step-label { font-size: 13px; font-weight: 950; line-height: 1.25; }
+.side-step .status-icon { font-size: 16px; }
+.side-step.active { background: rgba(9, 22, 31, .52); outline: 2px solid #d7b219; outline-offset: -3px; color: #fff; }
 .side-step.done .paw { color: #ffd64c; }
 .side-step.locked { opacity: 0.5; cursor: not-allowed; }
+
+/* Collapsed sidebar */
+#game-layout.nav-collapsed #stage-sidebar { width: 64px; }
+#game-layout.nav-collapsed .side-head { justify-content: center; padding: 8px 6px; }
+#game-layout.nav-collapsed .side-head-text { display: none; }
+#game-layout.nav-collapsed #stage-nav { flex-direction: column; }
+#game-layout.nav-collapsed .side-step { grid-template-columns: 1fr; justify-items: center; min-height: 48px; padding: 6px 4px; }
+#game-layout.nav-collapsed .side-step .side-step-label,
+#game-layout.nav-collapsed .side-step .status-icon { display: none; }
+
+/* ── Desktop: サイドバーは常に展開 ── */
+@media (min-width: 901px) {
+  #game-layout.nav-collapsed { grid-template-columns: 230px minmax(0, 1fr) !important; }
+  #game-layout.nav-collapsed #stage-sidebar { width: auto !important; }
+  #game-layout.nav-collapsed .side-head { justify-content: space-between !important; padding: 10px !important; }
+  #game-layout.nav-collapsed .side-head-text { display: block !important; }
+  #game-layout.nav-collapsed .side-step { grid-template-columns: 28px 1fr 20px !important; justify-items: start !important; min-height: 64px !important; padding: 8px 10px !important; }
+  #game-layout.nav-collapsed .side-step .side-step-label,
+  #game-layout.nav-collapsed .side-step .status-icon { display: block !important; }
+}
 
 #main-column {
   flex: 1;
@@ -291,67 +315,45 @@ body {
   gap: 12px;
 }
 
-/* 幅900px以下: サイドバーは常にアイコンレール(狭幅)がデフォルト。
-   ボタンで開くとインラインのまま幅を広げて中身を表示する。 */
+/* ── Responsive (cpu_questと同一のブレークポイント/挙動) ── */
 @media (max-width: 900px) {
-  #stage-sidebar { width: 56px; }
-  #stage-sidebar .side-head { justify-content: center; padding: 10px 6px; }
-  #stage-sidebar .side-head-text { display: none; }
-  .side-step { justify-content: center; padding: 10px 4px; }
-  .side-step .side-step-label,
-  .side-step .status-icon { display: none; }
-
-  #game-layout:not(.nav-collapsed) #stage-sidebar { width: 200px; }
-  #game-layout:not(.nav-collapsed) .side-head { justify-content: space-between; padding: 10px 10px 10px 14px; }
-  #game-layout:not(.nav-collapsed) .side-head-text { display: block; }
-  #game-layout:not(.nav-collapsed) .side-step { justify-content: flex-start; padding: 10px 14px; }
-  #game-layout:not(.nav-collapsed) .side-step .side-step-label,
-  #game-layout:not(.nav-collapsed) .side-step .status-icon { display: block; }
-}
-
-/* 幅700px以下: サイドバーは開いた時だけ画面に重なるドロワー(オーバーレイ)として表示する。 */
-@media (max-width: 700px) {
   body { padding: 8px; gap: 8px; }
-  #app-header { padding: 8px 12px; }
-  #app-header h1 { font-size: 18px; }
-  /* この幅ではサイドバーを常にposition:fixedにしてレイアウトから外し、
-     本文(#main-column)の表示幅が狭くならないようにする。
-     折りたたみ時は開閉ボタンだけを残して完全に非表示にし、
-     展開時だけ画面に重なるドロワー(オーバーレイ)として表示する。 */
+  #app-header h1 { font-size: 20px; }
+  #game-layout { grid-template-columns: 64px minmax(0, 1fr); gap: 8px; }
+  #game-layout:not(.nav-collapsed) { grid-template-columns: 210px minmax(0, 1fr); }
+  #stage-sidebar { display: block; order: 0; position: sticky; top: 8px; }
+}
+@media (max-width: 700px) {
+  #game-layout { grid-template-columns: 1fr; }
+  #game-layout.nav-collapsed,
+  #game-layout:not(.nav-collapsed) { grid-template-columns: 1fr; }
   #stage-sidebar {
     position: fixed;
-    z-index: 80;
-  }
-  #game-layout.nav-collapsed #stage-sidebar {
-    top: 10px;
-    left: auto;
-    right: 10px;
-    width: auto;
-    height: auto;
-    background: none;
-    border: none;
-    box-shadow: none;
-  }
-  #game-layout.nav-collapsed #stage-nav { display: none; }
-  #game-layout.nav-collapsed .side-head { padding: 0; border-bottom: none; }
-  #game-layout.nav-collapsed .side-head-text { display: none; }
-  #game-layout:not(.nav-collapsed) #stage-sidebar {
     top: 0;
     left: 0;
-    width: min(82vw, 280px);
+    width: min(82vw, 300px);
     height: 100vh;
     height: 100dvh;
     border-radius: 0;
+    transform: translateX(-100%);
+    transition: transform .25s ease;
     box-shadow: 10px 0 30px rgba(0, 0, 0, .45);
+    overflow-y: auto;
+    z-index: 80;
   }
-  #side-backdrop { display: none; }
-  #game-layout:not(.nav-collapsed) #side-backdrop {
-    display: block;
+  #game-layout.nav-collapsed #stage-sidebar { transform: translateX(-100%); }
+  #game-layout:not(.nav-collapsed) #stage-sidebar { transform: translateX(0); }
+  #side-backdrop {
+    display: none;
     position: fixed;
     inset: 0;
     background: rgba(6, 12, 18, .55);
     z-index: 70;
   }
+  #game-layout:not(.nav-collapsed) #side-backdrop { display: block; }
+
+  #app-header { padding: 8px 12px; }
+  #app-header h1 { font-size: 18px; }
   #main-column { gap: 8px; }
   #dialogue-panel { padding: 8px 10px; }
   #mission-banner { padding: 8px 12px; }
