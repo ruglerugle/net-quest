@@ -22,14 +22,18 @@ body {
   min-height: 100vh;
   background: radial-gradient(circle at 20% 0%, #29465a 0, #122838 34%, #09141d 100%);
   color: var(--text);
+  font-weight: 600;
+}
+
+.app-shell {
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
   gap: 10px;
   padding: 10px;
-  font-weight: 600;
 }
 
-#app-header {
+.game-header {
   display: flex;
   align-items: center;
   gap: 14px;
@@ -41,11 +45,18 @@ body {
   flex-wrap: wrap;
 }
 
-#app-header h1 { margin: 0; font-size: 22px; color: #ffdf5a; font-weight: 900; text-shadow: 0 2px 0 rgba(0, 0, 0, .35); display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
-#app-header .subtitle { font-size: 13px; color: #fff; font-weight: 700; }
-#app-header .subtitle::before { content: "🐾 "; }
+.brand { display: flex; flex-direction: column; gap: 2px; min-width: 190px; }
+.brand-title { margin: 0; font-size: 22px; color: #ffdf5a; font-weight: 900; text-shadow: 0 2px 0 rgba(0, 0, 0, .35); }
+.brand-sub { font-size: 13px; color: #fff; font-weight: 700; }
+.brand-sub::before { content: "🐾 "; }
 
-/* ── Layout (cpu_questと同一構造) ── */
+.head-progress-wrap { flex: 1; min-width: 160px; display: flex; flex-direction: column; gap: 4px; }
+.head-progress-label { font-size: 11.5px; color: #dbe8f3; font-weight: 800; }
+.head-progress { height: 14px; background: rgba(255, 255, 255, .18); border-radius: 999px; overflow: hidden; box-shadow: inset 0 2px 4px rgba(0, 0, 0, .3); }
+.head-progress-fill { height: 100%; width: 0; background: linear-gradient(90deg, #bfe3ff, var(--accent)); border-radius: 999px; transition: width .4s; }
+
+/* ── Layout (cpu_quest/oop-gameと共通構造) ── */
+.header-actions { display: flex; align-items: center; gap: 10px; margin-left: auto; }
 .head-btn {
   height: 40px;
   padding: 0 16px;
@@ -58,7 +69,6 @@ body {
   cursor: pointer;
   box-shadow: 0 2px 0 rgba(0, 0, 0, .26);
   touch-action: manipulation;
-  margin-left: auto;
 }
 .head-btn:hover { background: rgba(255, 255, 255, .15); }
 a.head-btn { text-decoration: none; display: inline-flex; align-items: center; justify-content: center; }
@@ -74,7 +84,7 @@ a.head-btn { text-decoration: none; display: inline-flex; align-items: center; j
   transform: translateY(-2px) scale(1.07);
 }
 
-#game-layout {
+.game-layout {
   display: grid;
   grid-template-columns: 230px minmax(0, 1fr);
   gap: 14px;
@@ -84,7 +94,7 @@ a.head-btn { text-decoration: none; display: inline-flex; align-items: center; j
 }
 
 /* ── Side panel ── */
-#stage-sidebar {
+.side-panel {
   background: linear-gradient(180deg, rgba(39, 55, 64, .96), rgba(23, 38, 48, .98));
   position: sticky;
   top: 8px;
@@ -109,7 +119,7 @@ a.head-btn { text-decoration: none; display: inline-flex; align-items: center; j
   min-height: 48px;
 }
 .side-head-text { white-space: nowrap; }
-#sidebar-toggle {
+.side-toggle {
   width: 36px;
   height: 32px;
   border: 1px solid rgba(255, 255, 255, .28);
@@ -122,10 +132,10 @@ a.head-btn { text-decoration: none; display: inline-flex; align-items: center; j
   line-height: 1;
   flex-shrink: 0;
 }
-#side-backdrop { display: none; }
+.side-backdrop { display: none; }
 
 /* Step list in sidebar */
-#stage-nav { display: flex; flex-direction: column; }
+.step-list { display: flex; flex-direction: column; }
 .side-step {
   display: grid;
   grid-template-columns: 28px 1fr 20px;
@@ -154,26 +164,27 @@ a.head-btn { text-decoration: none; display: inline-flex; align-items: center; j
 .side-step.locked { opacity: 0.5; cursor: not-allowed; }
 
 /* Collapsed sidebar */
-#game-layout.nav-collapsed #stage-sidebar { width: 64px; }
-#game-layout.nav-collapsed .side-head { justify-content: center; padding: 8px 6px; }
-#game-layout.nav-collapsed .side-head-text { display: none; }
-#game-layout.nav-collapsed #stage-nav { flex-direction: column; }
-#game-layout.nav-collapsed .side-step { grid-template-columns: 1fr; justify-items: center; min-height: 48px; padding: 6px 4px; }
-#game-layout.nav-collapsed .side-step .side-step-label,
-#game-layout.nav-collapsed .side-step .status-icon { display: none; }
+.app-shell.side-collapsed .game-layout { grid-template-columns: 64px minmax(0, 1fr); }
+.app-shell.side-collapsed .side-panel { width: 64px; }
+.app-shell.side-collapsed .side-head { justify-content: center; padding: 8px 6px; }
+.app-shell.side-collapsed .side-head-text { display: none; }
+.app-shell.side-collapsed .step-list { flex-direction: column; }
+.app-shell.side-collapsed .side-step { grid-template-columns: 1fr; justify-items: center; min-height: 48px; padding: 6px 4px; }
+.app-shell.side-collapsed .side-step .side-step-label,
+.app-shell.side-collapsed .side-step .status-icon { display: none; }
 
 /* ── Desktop: サイドバーは常に展開 ── */
 @media (min-width: 901px) {
-  #game-layout.nav-collapsed { grid-template-columns: 230px minmax(0, 1fr) !important; }
-  #game-layout.nav-collapsed #stage-sidebar { width: auto !important; }
-  #game-layout.nav-collapsed .side-head { justify-content: space-between !important; padding: 10px !important; }
-  #game-layout.nav-collapsed .side-head-text { display: block !important; }
-  #game-layout.nav-collapsed .side-step { grid-template-columns: 28px 1fr 20px !important; justify-items: start !important; min-height: 64px !important; padding: 8px 10px !important; }
-  #game-layout.nav-collapsed .side-step .side-step-label,
-  #game-layout.nav-collapsed .side-step .status-icon { display: block !important; }
+  .app-shell.side-collapsed .game-layout { grid-template-columns: 230px minmax(0, 1fr) !important; }
+  .app-shell.side-collapsed .side-panel { width: auto !important; }
+  .app-shell.side-collapsed .side-head { justify-content: space-between !important; padding: 10px !important; }
+  .app-shell.side-collapsed .side-head-text { display: block !important; }
+  .app-shell.side-collapsed .side-step { grid-template-columns: 28px 1fr 20px !important; justify-items: start !important; min-height: 64px !important; padding: 8px 10px !important; }
+  .app-shell.side-collapsed .side-step .side-step-label,
+  .app-shell.side-collapsed .side-step .status-icon { display: block !important; }
 }
 
-#main-column {
+.main-area {
   flex: 1;
   min-width: 0;
   display: flex;
@@ -204,14 +215,7 @@ a.head-btn { text-decoration: none; display: inline-flex; align-items: center; j
 #mission-status.success { color: var(--ok); }
 #mission-status.fail { color: var(--danger); }
 
-#app-main {
-  flex: 1;
-  display: flex;
-  gap: 12px;
-}
-
 #stage-area {
-  flex: 1;
   background: linear-gradient(180deg, #ffffff, #f8fbff);
   border: 1px solid var(--border);
   border-radius: 12px;
@@ -319,27 +323,19 @@ a.head-btn { text-decoration: none; display: inline-flex; align-items: center; j
   padding: 8px;
 }
 
-#side-panel {
-  width: 300px;
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-/* ── Responsive (cpu_questと同一のブレークポイント/挙動) ── */
+/* ── Responsive (cpu_quest/oop-gameと同一のブレークポイント/挙動) ── */
 @media (max-width: 900px) {
-  body { padding: 8px; gap: 8px; }
-  #app-header h1 { font-size: 20px; }
-  #game-layout { grid-template-columns: 64px minmax(0, 1fr); gap: 8px; }
-  #game-layout:not(.nav-collapsed) { grid-template-columns: 210px minmax(0, 1fr); }
-  #stage-sidebar { display: block; order: 0; position: sticky; top: 8px; }
+  .app-shell { padding: 8px; gap: 8px; }
+  .brand-title { font-size: 20px; }
+  .game-layout { grid-template-columns: 64px minmax(0, 1fr); gap: 8px; }
+  .app-shell:not(.side-collapsed) .game-layout { grid-template-columns: 210px minmax(0, 1fr); }
+  .side-panel { display: block; order: 0; position: sticky; top: 8px; }
 }
 @media (max-width: 700px) {
-  #game-layout { grid-template-columns: 1fr; }
-  #game-layout.nav-collapsed,
-  #game-layout:not(.nav-collapsed) { grid-template-columns: 1fr; }
-  #stage-sidebar {
+  .game-layout { grid-template-columns: 1fr; }
+  .app-shell.side-collapsed .game-layout,
+  .app-shell:not(.side-collapsed) .game-layout { grid-template-columns: 1fr; }
+  .side-panel {
     position: fixed;
     top: 0;
     left: 0;
@@ -353,27 +349,23 @@ a.head-btn { text-decoration: none; display: inline-flex; align-items: center; j
     overflow-y: auto;
     z-index: 80;
   }
-  #game-layout.nav-collapsed #stage-sidebar { transform: translateX(-100%); }
-  #game-layout:not(.nav-collapsed) #stage-sidebar { transform: translateX(0); }
-  #side-backdrop {
+  .app-shell.side-collapsed .side-panel { transform: translateX(-100%); }
+  .app-shell:not(.side-collapsed) .side-panel { transform: translateX(0); }
+  .side-backdrop {
     display: none;
     position: fixed;
     inset: 0;
     background: rgba(6, 12, 18, .55);
     z-index: 70;
   }
-  #game-layout:not(.nav-collapsed) #side-backdrop { display: block; }
+  .app-shell:not(.side-collapsed) .side-backdrop { display: block; }
 
-  #app-header { padding: 8px 12px; }
-  #app-header h1 { font-size: 18px; }
-  #main-column { gap: 8px; }
+  .game-header { padding: 8px 12px; }
+  .brand-title { font-size: 18px; }
+  .main-area { gap: 8px; }
   #dialogue-panel { padding: 8px 10px; }
   #mission-banner { padding: 8px 12px; }
-  #app-main {
-    flex-direction: column;
-  }
   #svg-wrap { min-height: 260px; }
-  #side-panel { width: auto; }
   #stage-actions button,
   #stage-actions select,
   #stage-actions input[type=text] {

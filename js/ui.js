@@ -303,6 +303,13 @@ export function setMissionStatus(text, cls) {
 export function renderStageNav(stages, state, onSelect) {
   const nav = document.getElementById('stage-nav');
   nav.innerHTML = '';
+
+  const clearedCount = Math.max(0, state.unlockedCount - 1);
+  const progressLabel = document.getElementById('progress-label');
+  const progressFill = document.getElementById('progress-fill');
+  if (progressLabel) progressLabel.textContent = `クリア ${clearedCount} / ${stages.length}`;
+  if (progressFill) progressFill.style.width = `${(clearedCount / stages.length) * 100}%`;
+
   stages.forEach((s, i) => {
     const done = i < state.unlockedCount - 1;
     const locked = i > state.unlockedCount - 1;
