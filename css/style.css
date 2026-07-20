@@ -45,33 +45,69 @@ body {
 #app-header .subtitle { font-size: 13px; color: #fff; font-weight: 700; }
 #app-header .subtitle::before { content: "🐾 "; }
 
+#game-layout {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  flex: 1;
+  min-height: 0;
+}
+
+#stage-sidebar {
+  width: 230px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 10px;
+  background: linear-gradient(180deg, rgba(39, 55, 64, .96), rgba(23, 38, 48, .98));
+  border: 1px solid rgba(255, 255, 255, .22);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  color: #fff;
+  overflow: hidden;
+}
+#stage-sidebar .side-head {
+  font-size: 13px;
+  font-weight: 900;
+  color: #ffdf5a;
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, .18);
+}
+
 #stage-nav {
   display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
+  flex-direction: column;
+  max-height: 74vh;
+  overflow-y: auto;
 }
 
-#stage-nav button {
-  background: rgba(255, 255, 255, .10);
-  border: 1px solid rgba(255, 255, 255, .28);
-  color: #dbe8f3;
-  padding: 6px 12px;
-  border-radius: 999px;
+.side-step {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border: none;
+  border-bottom: 1px solid rgba(255, 255, 255, .10);
   cursor: pointer;
-  font-size: 12px;
-  font-weight: 700;
+  color: #cbd6de;
+  background: none;
+  text-align: left;
+  font-family: inherit;
+  width: 100%;
 }
+.side-step:hover { background: rgba(255, 255, 255, .07); }
+.side-step .paw { font-size: 15px; flex-shrink: 0; width: 18px; text-align: center; }
+.side-step .side-step-label { flex: 1; font-size: 13px; font-weight: 700; line-height: 1.3; }
+.side-step .status-icon { font-size: 13px; flex-shrink: 0; }
+.side-step.active { background: rgba(9, 22, 31, .6); outline: 2px solid #ffd44a; outline-offset: -2px; color: #fff; }
+.side-step.done .paw { color: #ffd64c; }
+.side-step.locked { opacity: 0.5; cursor: not-allowed; }
 
-#stage-nav button.active {
-  background: linear-gradient(#ffe36b, #e0ad1d);
-  color: #3b2a06;
-  border-color: #c98f12;
-  font-weight: 900;
-}
-
-#stage-nav button:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
+#main-column {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 #dialogue-panel {
@@ -224,6 +260,13 @@ body {
   body { padding: 8px; gap: 8px; }
   #app-header { padding: 8px 12px; }
   #app-header h1 { font-size: 18px; }
+  #game-layout { flex-direction: column; }
+  #stage-sidebar {
+    width: auto;
+    position: static;
+  }
+  #stage-nav { max-height: 180px; }
+  #main-column { gap: 8px; }
   #dialogue-panel { padding: 8px 10px; }
   #mission-banner { padding: 8px 12px; }
   #app-main {
