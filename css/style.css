@@ -72,6 +72,16 @@ body {
 #game-layout.nav-collapsed .side-step { justify-content: center; padding: 10px 4px; }
 #game-layout.nav-collapsed .side-step .side-step-label,
 #game-layout.nav-collapsed .side-step .status-icon { display: none; }
+
+/* 幅901px以上ではサイドバーを常にフル表示にする(折りたたみ操作は無効化) */
+@media (min-width: 901px) {
+  #game-layout.nav-collapsed #stage-sidebar { width: 230px !important; }
+  #game-layout.nav-collapsed .side-head { justify-content: space-between !important; padding: 10px 10px 10px 14px !important; }
+  #game-layout.nav-collapsed .side-head-text { display: block !important; }
+  #game-layout.nav-collapsed .side-step { justify-content: flex-start !important; padding: 10px 14px !important; }
+  #game-layout.nav-collapsed .side-step .side-step-label,
+  #game-layout.nav-collapsed .side-step .status-icon { display: block !important; }
+}
 #stage-sidebar .side-head {
   display: flex;
   align-items: center;
@@ -281,12 +291,29 @@ body {
   gap: 12px;
 }
 
-@media (max-width: 760px) {
+/* 幅900px以下: サイドバーは常にアイコンレール(狭幅)がデフォルト。
+   ボタンで開くとインラインのまま幅を広げて中身を表示する。 */
+@media (max-width: 900px) {
+  #stage-sidebar { width: 56px; }
+  #stage-sidebar .side-head { justify-content: center; padding: 10px 6px; }
+  #stage-sidebar .side-head-text { display: none; }
+  .side-step { justify-content: center; padding: 10px 4px; }
+  .side-step .side-step-label,
+  .side-step .status-icon { display: none; }
+
+  #game-layout:not(.nav-collapsed) #stage-sidebar { width: 200px; }
+  #game-layout:not(.nav-collapsed) .side-head { justify-content: space-between; padding: 10px 10px 10px 14px; }
+  #game-layout:not(.nav-collapsed) .side-head-text { display: block; }
+  #game-layout:not(.nav-collapsed) .side-step { justify-content: flex-start; padding: 10px 14px; }
+  #game-layout:not(.nav-collapsed) .side-step .side-step-label,
+  #game-layout:not(.nav-collapsed) .side-step .status-icon { display: block; }
+}
+
+/* 幅700px以下: サイドバーは開いた時だけ画面に重なるドロワー(オーバーレイ)として表示する。 */
+@media (max-width: 700px) {
   body { padding: 8px; gap: 8px; }
   #app-header { padding: 8px 12px; }
   #app-header h1 { font-size: 18px; }
-  /* サイドバーは縦に積まず常に左カラムとして残す。開いた時だけ
-     画面に重なるドロワー(オーバーレイ)として表示する。 */
   #stage-sidebar { top: 8px; }
   #game-layout:not(.nav-collapsed) #stage-sidebar {
     position: fixed;

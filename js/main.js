@@ -113,11 +113,6 @@ document.getElementById('sidebar-toggle').addEventListener('click', () => {
 document.getElementById('side-backdrop').addEventListener('click', () => {
   document.getElementById('game-layout').classList.add('nav-collapsed');
 });
-// スマホ幅では初期表示をアイコンレール(折りたたみ)にしておく。
-// そのままだとサイドバーが画面いっぱいのドロワーとして開いた状態で起動してしまうため。
-if (window.matchMedia('(max-width: 760px)').matches) {
-  document.getElementById('game-layout').classList.add('nav-collapsed');
-}
 
 // 非表示タブでのスロットリングを避けるため setInterval を使用（rAFはバックグラウンドで停止しうる）。
 // 画面のリフレッシュレート(60Hz)に対して更新が33ms(約30fps)おきだと、同じ位置が
