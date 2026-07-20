@@ -124,3 +124,4 @@ setInterval(() => {
 }, 16);
 
 loadStage(0);
+ui.renderBookRecommend();

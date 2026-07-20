@@ -360,6 +360,22 @@ export function renderStageActions(container, stageDef, state, api) {
   stageDef.renderActions(container, state, api);
 }
 
+const BOOK_RECOMMEND = {
+  title: '井上直也, 村山公保, 竹下隆史, 荒井透, 苅田幸雄『マスタリングTCP/IP 入門編(第6版)』(オーム社)',
+  url: 'https://www.amazon.co.jp/dp/4274224473?tag=senjin-22',
+};
+
+export function renderBookRecommend() {
+  const el = document.getElementById('book-recommend');
+  el.innerHTML = `
+    <p class="book-recommend-label">参考文献</p>
+    <div class="book-recommend-body">
+      <p class="book-recommend-lead">もっと深く学びたい方へ</p>
+      <a href="${BOOK_RECOMMEND.url}" target="_blank" rel="sponsored noopener">${escapeHtml(BOOK_RECOMMEND.title)}</a>
+    </div>
+  `;
+}
+
 function escapeHtml(str) {
   return str.replace(/[&<>"']/g, (c) => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
