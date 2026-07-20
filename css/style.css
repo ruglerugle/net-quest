@@ -285,14 +285,28 @@ body {
   body { padding: 8px; gap: 8px; }
   #app-header { padding: 8px 12px; }
   #app-header h1 { font-size: 18px; }
-  #game-layout { flex-direction: column; }
-  #stage-sidebar {
-    width: auto;
-    position: static;
+  /* サイドバーは縦に積まず常に左カラムとして残す。開いた時だけ
+     画面に重なるドロワー(オーバーレイ)として表示する。 */
+  #stage-sidebar { top: 8px; }
+  #game-layout:not(.nav-collapsed) #stage-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: min(82vw, 280px);
+    height: 100vh;
+    height: 100dvh;
+    border-radius: 0;
+    z-index: 80;
+    box-shadow: 10px 0 30px rgba(0, 0, 0, .45);
   }
-  #stage-nav { max-height: 180px; }
-  #game-layout.nav-collapsed #stage-sidebar { width: auto; }
-  #game-layout.nav-collapsed #stage-nav { display: none; }
+  #side-backdrop { display: none; }
+  #game-layout:not(.nav-collapsed) #side-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(6, 12, 18, .55);
+    z-index: 70;
+  }
   #main-column { gap: 8px; }
   #dialogue-panel { padding: 8px 10px; }
   #mission-banner { padding: 8px 12px; }
