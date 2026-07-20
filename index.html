@@ -8,13 +8,15 @@
 </head>
 <body>
 <header id="app-header">
-  <button id="sidebar-toggle" title="ステージ一覧の表示切替" aria-label="ステージ一覧の表示切替">☰</button>
   <h1>NET QUEST <span class="subtitle">― 届け！そのパケット ―</span></h1>
 </header>
 
 <div id="game-layout">
   <aside id="stage-sidebar">
-    <div class="side-head">ステージ一覧</div>
+    <div class="side-head">
+      <span class="side-head-text">ステージ一覧</span>
+      <button id="sidebar-toggle" title="ステージ一覧の表示切替" aria-label="ステージ一覧の表示切替">☰</button>
+    </div>
     <nav id="stage-nav"></nav>
   </aside>
 
