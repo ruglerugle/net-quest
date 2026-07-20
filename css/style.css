@@ -314,16 +314,34 @@ body {
   body { padding: 8px; gap: 8px; }
   #app-header { padding: 8px 12px; }
   #app-header h1 { font-size: 18px; }
-  #stage-sidebar { top: 8px; }
-  #game-layout:not(.nav-collapsed) #stage-sidebar {
+  /* この幅ではサイドバーを常にposition:fixedにしてレイアウトから外し、
+     本文(#main-column)の表示幅が狭くならないようにする。
+     折りたたみ時は開閉ボタンだけを残して完全に非表示にし、
+     展開時だけ画面に重なるドロワー(オーバーレイ)として表示する。 */
+  #stage-sidebar {
     position: fixed;
+    z-index: 80;
+  }
+  #game-layout.nav-collapsed #stage-sidebar {
+    top: 10px;
+    left: auto;
+    right: 10px;
+    width: auto;
+    height: auto;
+    background: none;
+    border: none;
+    box-shadow: none;
+  }
+  #game-layout.nav-collapsed #stage-nav { display: none; }
+  #game-layout.nav-collapsed .side-head { padding: 0; border-bottom: none; }
+  #game-layout.nav-collapsed .side-head-text { display: none; }
+  #game-layout:not(.nav-collapsed) #stage-sidebar {
     top: 0;
     left: 0;
     width: min(82vw, 280px);
     height: 100vh;
     height: 100dvh;
     border-radius: 0;
-    z-index: 80;
     box-shadow: 10px 0 30px rgba(0, 0, 0, .45);
   }
   #side-backdrop { display: none; }
