@@ -1,0 +1,28 @@
+name: Deploy to Cloudflare Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Assemble combined site
+        run: |
+          mkdir -p site
+          for repo in algo-quest net-quest oop-game cpu-logic-game memory-quest c-pointer-dojo; do
+            git clone --depth 1 "https://github.com/ruglerugle/$repo.git" "site/$repo"
+            rm -rf "site/$repo/.git"
+          done
+          git clone --depth 1 https://github.com/ruglerugle/ruglerugle.github.io.git site/_hub
+          cp site/_hub/index.html site/index.html
+          rm -rf site/_hub
+
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=informatics-habatakijuku --branch=main
