@@ -64,7 +64,14 @@ body {
   box-shadow: var(--shadow);
   color: #fff;
   overflow: hidden;
+  transition: width .25s ease;
 }
+#game-layout.nav-collapsed #stage-sidebar { width: 56px; }
+#game-layout.nav-collapsed .side-head { justify-content: center; padding: 10px 6px; }
+#game-layout.nav-collapsed .side-head-text { display: none; }
+#game-layout.nav-collapsed .side-step { justify-content: center; padding: 10px 4px; }
+#game-layout.nav-collapsed .side-step .side-step-label,
+#game-layout.nav-collapsed .side-step .status-icon { display: none; }
 #stage-sidebar .side-head {
   display: flex;
   align-items: center;
@@ -96,9 +103,6 @@ body {
   flex-direction: column;
   max-height: 74vh;
   overflow-y: auto;
-}
-#stage-nav.collapsed {
-  display: none;
 }
 
 .side-step {
@@ -287,6 +291,8 @@ body {
     position: static;
   }
   #stage-nav { max-height: 180px; }
+  #game-layout.nav-collapsed #stage-sidebar { width: auto; }
+  #game-layout.nav-collapsed #stage-nav { display: none; }
   #main-column { gap: 8px; }
   #dialogue-panel { padding: 8px 10px; }
   #mission-banner { padding: 8px 12px; }

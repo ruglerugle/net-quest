@@ -108,7 +108,7 @@ document.getElementById('btn-reset').addEventListener('click', () => {
   loadStage(gameState.stageIndex);
 });
 document.getElementById('sidebar-toggle').addEventListener('click', () => {
-  document.getElementById('stage-nav').classList.toggle('collapsed');
+  document.getElementById('game-layout').classList.toggle('nav-collapsed');
 });
 
 // 非表示タブでのスロットリングを避けるため setInterval を使用（rAFはバックグラウンドで停止しうる）。
