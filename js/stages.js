@@ -343,6 +343,9 @@ const stage1 = {
     { who: 'cat', text: 'うさ美ちゃん、ネットワークの基本は「物理的につながっていること」だよ。ケーブルが抜けていたら、どんなに賢いコンピューターでも何も送れないんだ。' },
     { who: 'rabbit', text: 'そんな当たり前のこと…と思ったけど、意外と忘れがちですね。' },
     { who: 'cat', text: 'これがOSI参照モデルでいう<strong>第1層（物理層）</strong>だよ。まずはPC-AとPC-Bをケーブルでつないで、メッセージを送ってみよう。' },
+    { who: 'cat', text: 'ネットワークが無かった時代、コンピューター同士でデータをやり取りするには、フロッピーディスクに保存して人が歩いて届けるしかなかったんだ。<strong>「スニーカーネット」</strong>なんて呼ばれていたくらいだよ。' },
+    { who: 'rabbit', text: '歩いて届ける…！想像しただけで大変そうです。' },
+    { who: 'cat', text: '今でも実は同じで、どんなに高性能な機器でも物理的につながっていなければ何も送れない。実際、企業のネットワーク障害の原因で今も多いのが「ケーブルが抜けていた」「断線していた」なんだよ。' },
     { who: 'rabbit', text: 'ケーブルを抜いてみたら本当に届かなくなるか、試してみます！', variant: 'think' },
   ],
   revealFields: { ip: false, mac: false, ttl: false },
@@ -399,6 +402,9 @@ const stage2 = {
     { who: 'cat', text: '最初は何も知らないんだ。だから宛先が分からないフレームは、とりあえず全部の部屋（ポート）に配ってしまう。これを<strong>フラッディング</strong>というよ。' },
     { who: 'rabbit', text: 'それじゃ効率悪くないですか？', variant: 'think' },
     { who: 'cat', text: '大丈夫、届いた相手が返事をすると、スイッチはその相手の場所を覚えるんだ。次からは必要な方向にだけ届く。<strong>MACアドレステーブル</strong>の学習だよ。' },
+    { who: 'cat', text: '実は昔のイーサネットは、1本の同軸ケーブルやハブにみんながぶら下がる方式で、全員が同じ「電波」を共有していたんだ。' },
+    { who: 'rabbit', text: '全員が同時にしゃべったら、混線しちゃいそうですね…' },
+    { who: 'cat', text: 'その通り、実際に信号がぶつかる<strong>コリジョン（衝突）</strong>が頻発して、PCが増えるほど通信が遅くなる問題があった。スイッチ（当時は「ブリッジ」と呼ばれた）が登場して、必要な相手にだけ届けることでこの問題を解決したんだよ。' },
   ],
   revealFields: { ip: false, mac: true, ttl: false },
   zones: [],
@@ -498,6 +504,9 @@ const stage3 = {
     { who: 'cat', text: '実は届くかどうかは、相手が「同じ町内（同一ネットワーク）」かどうかで変わるんだ。PC-AとPC-BのIPを見比べて確かめてみよう。' },
     { who: 'rabbit', text: '町内なら普通に届いて、町外だと届かない…？', variant: 'think' },
     { who: 'cat', text: '町外に届けるには、道案内をしてくれる<strong>ルーター</strong>が必要になる。それはまた次のステージでね。' },
+    { who: 'cat', text: 'MACアドレスだけの世界がなぜダメなのか。実はMACアドレスには「地域」の概念がないんだ。' },
+    { who: 'rabbit', text: '地域がないと、何が困るんですか？' },
+    { who: 'cat', text: '世界中の全てのMACアドレスを一つのネットワークに繋いだら、宛先不明のフレームが際限なく飛び交って（ブロードキャストストーム）パンクしてしまう。1970年代、複数の異なるネットワーク（ARPANetや衛星回線、無線網）をつなぐ必要に迫られたヴィント・サーフとボブ・カーンが、階層的な「住所」の仕組みとして<strong>IP</strong>を考案したんだ。' },
   ],
   revealFields: { ip: true, mac: true, ttl: false },
   zones: [],
@@ -611,6 +620,9 @@ const stage4 = {
     { who: 'cat', text: '大声で聞くのさ。<strong>ARP</strong>だよ。「192.168.1.20さんは誰ですか？」ってLAN全体に呼びかけるんだ。' },
     { who: 'rabbit', text: 'みんな返事するんですか？うるさそう…', variant: 'think' },
     { who: 'cat', text: '返事をするのは本人だけ。他のPCは「自分じゃない」と黙って無視するんだよ。教えてもらったMACアドレスは<strong>ARPテーブル</strong>に記録して、次からは聞かなくて済むようにする。' },
+    { who: 'cat', text: 'もしARPが無かったら、IPアドレスとMACアドレスの対応表を、管理者が全部手作業で作って各PCに設定しなきゃいけなかった。' },
+    { who: 'rabbit', text: 'PCが増えるたびに、全部書き直すんですか…気が遠くなります。' },
+    { who: 'cat', text: 'しかもPCを入れ替えるとMACアドレスも変わるから、その度に更新も必要だった。1982年に<strong>ARP</strong>（RFC826）が標準化されて、この面倒な手作業から解放されたんだよ。' },
   ],
   revealFields: { ip: true, mac: true, ttl: false },
   zones: [],
@@ -666,7 +678,10 @@ const stage5 = {
     { who: 'rabbit', text: 'さっき教わった「町外にはルーターが必要」ってやつですね！' },
     { who: 'cat', text: 'その通り。大事なポイントがある。IPアドレスの宛先はPC-Bのまま、<strong>最後まで変わらない</strong>。でもMACアドレスの宛先は中継地点（ルーター）ごとに書き換えられるんだ。' },
     { who: 'rabbit', text: 'IPは最終目的地、MACは次の中継地点…宅配便の伝票と、配達員が持つ地図の違いみたいですね！', variant: 'think' },
-    { who: 'cat', text: 'いい例えだね。実際にPC-AからPC-Bへpingを送って、その様子を確かめてみよう。' },
+    { who: 'cat', text: 'もしルーターが無かったら、IPアドレスの「住所」があっても、それはただの飾り。同じ町（ネットワーク）から一歩も出られないんだ。' },
+    { who: 'rabbit', text: 'それじゃ、世界中のネットワークがバラバラのままですね。' },
+    { who: 'cat', text: 'ARPANetの時代、各拠点をつなぐために<strong>IMP</strong>（Interface Message Processor）という専用機が使われた。これが今のルーターのご先祖様だよ。ルーターが経路を選んでバケツリレーしてくれるおかげで、世界中のネットワークが1つの「インターネット」になれたんだ。' },
+    { who: 'cat', text: '実際にPC-AからPC-Bへpingを送って、その様子を確かめてみよう。' },
   ],
   revealFields: { ip: true, mac: true, ttl: true },
   zones: [
@@ -732,6 +747,9 @@ const finalStage = {
     { who: 'cat', text: 'ここまで学んだことを全部使う総まとめだよ。ケーブル、スイッチ、IP、ARP、ルーター…すべてが1つの通信の中で動いている。' },
     { who: 'rabbit', text: 'でも社内PCからWebサーバーへpingが通らないって聞きました…', variant: 'think' },
     { who: 'cat', text: 'うん、どこかに障害が起きているみたいだ。ネットワーク図をよく見て、配線が切れている箇所を見つけて直してから、もう一度届けてみよう。' },
+    { who: 'cat', text: 'ちなみに、こうした「層」に分けて考える整理の仕方こそが<strong>OSI参照モデル</strong>。実は、現場で使われているプロトコル群（TCP/IP）とは、生まれた経緯も歴史も別物なんだ。' },
+    { who: 'rabbit', text: 'え、違うものなんですか？てっきり同じだと…', variant: 'think' },
+    { who: 'cat', text: 'その謎は、このゲームの最後で明かすことにしよう。まずは目の前の障害を直すのが先決だね！' },
     { who: 'rabbit', text: '探偵うさ美、出動します！' },
   ],
   revealFields: { ip: true, mac: true, ttl: true },
@@ -804,6 +822,9 @@ const stage7 = {
     { who: 'cat', text: 'それだと他のPCと重複してしまうかもしれない。そこで<strong>DHCP</strong>サーバーが自動で配ってくれるんだ。Discover→Offer→Request→ACKの4段階のやり取りだよ。' },
     { who: 'rabbit', text: '「誰かIPアドレスください！」って叫んで、サーバーが「これはどう？」って提案してくれるんですね。', variant: 'think' },
     { who: 'cat', text: 'そのとおり。IPアドレスだけじゃなく、ゲートウェイやDNSサーバーの情報も一緒に配られる。もしDNSサーバーの設定を忘れたら…次のステージで困ることになるよ。' },
+    { who: 'cat', text: 'DHCPが無かった時代は、管理者がPC1台1台に手作業でIPアドレスを設定していたんだ。' },
+    { who: 'rabbit', text: '会社に1000台あったら…気が遠くなります。' },
+    { who: 'cat', text: 'しかも入力ミスで同じIPアドレスが重複すると、両方のPCが通信不能になるトラブルも頻発した。1993年に<strong>DHCP</strong>（RFC1531）が登場し、その前身の<strong>BOOTP</strong>を発展させる形で自動配布が実現したんだよ。' },
   ],
   revealFields: { ip: true, mac: true, ttl: false, port: false },
   zones: [],
@@ -873,6 +894,9 @@ const stage8 = {
     { who: 'cat', text: 'そう。<strong>DNS</strong>サーバーに「example.comのIPアドレスを教えて」と問い合わせて、初めて配達できるようになる。' },
     { who: 'rabbit', text: '毎回問い合わせるのは大変そう…' },
     { who: 'cat', text: '一度調べた結果は<strong>キャッシュ</strong>に残るから、次からは瞬時に分かるようになるよ。試してみよう。' },
+    { who: 'cat', text: 'DNSが無かった1980年代前半、ARPANetでは<strong>HOSTS.TXT</strong>という1つの巨大なテキストファイルに全ホスト名を書いて、みんながそれをダウンロードして使っていたんだ。' },
+    { who: 'rabbit', text: 'ネットワークが大きくなったら、その1つのファイルが大変なことになりそう…', variant: 'think' },
+    { who: 'cat', text: 'まさにそれが限界を迎えた。ホスト数が増えるほど更新も配布も追いつかなくなり、1983年にポール・モカペトリスが分散型の<strong>DNS</strong>（RFC882/883）を考案して解決したんだよ。' },
   ],
   revealFields: { ip: true, mac: true, ttl: false, port: false },
   zones: [],
@@ -941,6 +965,9 @@ const stage9 = {
     { who: 'cat', text: 'まさにそれ。その部屋番号にあたるのが<strong>ポート番号</strong>だよ。80番はHTTP、443番はHTTPS、25番はメール…部屋ごとに担当が違うんだ。' },
     { who: 'rabbit', text: '間違った部屋番号を指定したらどうなるんですか？', variant: 'think' },
     { who: 'cat', text: 'その部屋には誰もいないから、応答してもらえない。実際にいくつかのポートへ接続してみて、確かめてみよう。' },
+    { who: 'cat', text: 'もしポート番号が無かったら、1つのIPアドレスでは同時に1つのサービスしか提供できない。メールサーバーとWebサーバーを同じマシンで動かすことすらできなかったはずだよ。' },
+    { who: 'rabbit', text: '会社ごとにサーバーを1台ずつ用意しなきゃいけないなんて、大変そうです。' },
+    { who: 'cat', text: 'ポート番号のおかげで、1台のサーバーが何百もの異なるサービスを同時に提供できるようになったんだ。' },
   ],
   revealFields: { ip: true, mac: true, ttl: false, port: true },
   zones: [],
@@ -1104,6 +1131,9 @@ const stage10 = {
     { who: 'cat', text: '「通信していい？」「いいよ、そっちは？」「こちらも準備完了」——これでお互いの準備が整ったことを確認するんだ。' },
     { who: 'rabbit', text: 'もし途中でパケットが消えちゃったら？', variant: 'think' },
     { who: 'cat', text: '安心して、TCPは一定時間反応がないと同じデータを<strong>再送</strong>してくれる。UDPだとそれが無いから、届かなくてもそのまま。両方試して違いを感じてみよう。' },
+    { who: 'cat', text: 'IP自体は実は「ベストエフォート」——届けられたら届ける、程度の緩い約束しかしていない。パケットが消えても、順番が入れ替わっても、IPは知らんぷりなんだ。' },
+    { who: 'rabbit', text: 'それじゃ困りますよね…アプリが毎回自分で確認しなきゃいけないんですか？' },
+    { who: 'cat', text: 'まさにそこが問題だった。1974年、ヴィント・サーフとボブ・カーンが発表した論文で、信頼性の確保を1つの共通プロトコル（TCP）にまとめる設計を提案したんだ。おかげでアプリ開発者は、毎回同じ再送処理を書かなくて済むようになったんだよ。' },
   ],
   revealFields: { ip: true, mac: true, ttl: false, port: true },
   zones: [],
@@ -1243,6 +1273,9 @@ const stage11 = {
     { who: 'cat', text: 'さあ、ブラウザにURLを打ち込んでからページが表示されるまでの全工程を体験してみよう。' },
     { who: 'rabbit', text: 'DNSで住所を調べて、ARPでMACを調べて、ルーターを経由して、TCPで挨拶して…やっとページが見られる。', variant: 'think' },
     { who: 'cat', text: 'そのとおり！今まで一つ一つ学んできたことが、実は全部同時に動いていたんだ。shop.example.comへのアクセスを最初から最後まで見届けよう。' },
+    { who: 'cat', text: 'HTTPが生まれる前、離れた場所にある文書を読むにはFTPで1つずつファイルをダウンロードするしかなかった。文書同士をリンクでつなぐ発想も無かったんだ。' },
+    { who: 'rabbit', text: 'クリックひとつでページからページへ移動する、あの感覚が無かったんですね。' },
+    { who: 'cat', text: '1989〜91年、CERNのティム・バーナーズ=リーが、HTTP・HTML・URLの3点セットを考案して、今の「ウェブ」を生み出したんだ。' },
     { who: 'rabbit', text: '感動の完結編ですね！' },
   ],
   revealFields: { ip: true, mac: true, ttl: true, port: true },
@@ -1393,6 +1426,9 @@ const stage12 = {
     { who: 'cat', text: '油断は禁物。証明書の「発行対象」が、アクセスしたいドメインと一致しているか必ず確認するんだよ。なりすましサーバーは、違うドメイン名の証明書を出してくることがある。' },
     { who: 'rabbit', text: '例えばexample.comにアクセスしたいのに、証明書の発行対象がwww.evil.exampleだったら…', variant: 'think' },
     { who: 'cat', text: 'それは危険信号！正規サーバーなら信頼して、怪しいサーバーはきっぱり拒否しよう。' },
+    { who: 'cat', text: 'TLS(SSL)が無かった時代、Webでのやり取りはすべて平文——盗み見ようと思えば誰でも見れてしまう状態だったんだ。' },
+    { who: 'rabbit', text: 'パスワードとかクレジットカード番号も、丸見えだったってことですか…！', variant: 'think' },
+    { who: 'cat', text: 'そう。1994〜95年、ネットスケープ社がオンラインショッピングの安全性を確保するために<strong>SSL</strong>を開発し、それが今の<strong>TLS</strong>に発展したんだよ。' },
   ],
   revealFields: { ip: true, mac: true, ttl: false, port: true },
   zones: [],
@@ -1499,6 +1535,9 @@ const stage13 = {
     { who: 'cat', text: 'うん、論理的に壁を作るイメージだね。同じVLAN同士は普通に話せるけど、違うVLAN同士は届かない。' },
     { who: 'rabbit', text: 'でも部署をまたいで連絡したいこともありますよね？', variant: 'think' },
     { who: 'cat', text: 'そのときは<strong>ルーター（L3スイッチ）</strong>の出番。ただし、来客用Wi-FiのVLANだけは、セキュリティのために他の部署から完全に隔離されたままにしてあるよ。' },
+    { who: 'cat', text: 'VLANが無かった時代、部署ごとにネットワークを分けたければ、部署ごとに別々の物理スイッチと配線を用意するしかなかったんだ。' },
+    { who: 'rabbit', text: '引っ越しや組織変更のたびに配線工事…大変そうです。' },
+    { who: 'cat', text: '1998年に標準化された<strong>802.1Q</strong>規格のおかげで、同じ物理スイッチの上に論理的な壁を作れるようになり、配線を変えずに柔軟にネットワークを分けられるようになったんだよ。' },
   ],
   revealFields: { ip: true, mac: true, ttl: true, port: false },
   zones: [],
@@ -1707,6 +1746,9 @@ const stage14 = {
     { who: 'cat', text: 'ルーターが<strong>NAT</strong>という仕組みで、送信元を会社の代表となるグローバルIPアドレスに変換してくれているんだよ。' },
     { who: 'rabbit', text: 'みんな同じグローバルIPになったら、返事はどうやって正しいPCに届くんですか？', variant: 'think' },
     { who: 'cat', text: 'ポート番号ごとに対応表を作って区別しているんだ。PC-AとPC-B、両方から試して対応表を見てみよう。' },
+    { who: 'cat', text: 'NATが生まれた背景には、深刻な問題があった。IPv4アドレスは32ビット、約43億個しかない。1990年代、インターネットに繋がる機器が爆発的に増えて、このままでは足りなくなることが見えていたんだ。' },
+    { who: 'rabbit', text: '43億なんて多そうに聞こえますけど…足りなくなるんですか？' },
+    { who: 'cat', text: '世界人口よりずっと少ないし、1人が何台も機器を持つ時代だからね。1994年に<strong>NAT</strong>（RFC1631）が考案され、社内の何百台ものPCが1つのグローバルIPを共有できるようになって、アドレス不足を大きく先延ばしできたんだ。' },
   ],
   revealFields: { ip: true, mac: true, ttl: true, port: true },
   zones: [
@@ -1777,6 +1819,9 @@ const stage15 = {
     { who: 'cat', text: 'ネットワークの入り口には門番、<strong>ファイアウォール</strong>がいる。ポート番号ごとに通していいか、ダメかを判断するんだ。' },
     { who: 'rabbit', text: '443番ポートで接続できないって、利用者から苦情が来てます！', variant: 'think' },
     { who: 'cat', text: 'まずは実際に接続してみて、本当に遮断されているか確認しよう。原因が分かったら、ルールを直せばいい。' },
+    { who: 'cat', text: 'ファイアウォールが無かった時代、インターネットに直接つながったコンピューターは、外部からのどんな接続要求も無防備に受けてしまっていたんだ。' },
+    { who: 'rabbit', text: 'つまり、誰でも勝手にアクセスできちゃうってことですか…怖い。', variant: 'think' },
+    { who: 'cat', text: '1980年代後半に登場したパケットフィルタリング型ルーターが最初のファイアウォールで、1994年にはチェック・ポイント社が「ステートフルインスペクション」という、より賢い仕組みを実用化したんだよ。' },
     { who: 'rabbit', text: '探偵うさ美、今度はファイアウォール担当です！' },
   ],
   revealFields: { ip: true, mac: true, ttl: false, port: true },
@@ -1864,10 +1909,13 @@ const stage16 = {
   title: '障害調査モード：社員「インターネットが壊れました！」',
   missionText: 'どこかの配線が切れているようだ。ネットワーク図をよく確認し、切れている配線を見つけて繋ぎ直してから「アクセスする」を押そう。\n（配線はクリックで抜き差しできる。ステージをリセットすると別の箇所が切れた状態になる）',
   dialogue: [
-    { who: 'cat', text: '最後の仕上げだよ。社員さんから「インターネットが壊れました！」と連絡があった。' },
+    { who: 'cat', text: '実践編の総仕上げだよ。社員さんから「インターネットが壊れました！」と連絡があった。' },
     { who: 'rabbit', text: '原因は毎回違うんですよね？' },
     { who: 'cat', text: 'そう。今まで学んだ知識を総動員して、ネットワーク図を見ながらどこがおかしいのか突き止めよう。焦らず、配線から順番に確認するといいよ。' },
-    { who: 'rabbit', text: '今度こそ完璧に解決してみせます！', variant: 'think' },
+    { who: 'cat', text: 'ここで使っている「下の層から順番に確認する」という考え方、実はOSI参照モデルの一番の実用的な価値なんだ。' },
+    { who: 'rabbit', text: '実際に動いているのはTCP/IPなのに、診断にはOSIモデルを使うんですね。', variant: 'think' },
+    { who: 'cat', text: 'その通り。次のステージで、なぜそんなねじれた関係になったのか、じっくり解説するよ。' },
+    { who: 'rabbit', text: '今度こそ完璧に解決してみせます！' },
   ],
   revealFields: { ip: true, mac: true, ttl: true, port: true },
   zones: [
@@ -1933,8 +1981,126 @@ const stage16 = {
   },
 };
 
+// ===================== ステージ17：エピローグ「なぜTCP/IPが選ばれたのか」 =====================
+
+const TCPIP_QUIZ = [
+  {
+    q: '現在、実際にインターネットで動いているプロトコル群はどちらでしょう？',
+    choices: [
+      { key: 'A', text: 'OSIプロトコル' },
+      { key: 'B', text: 'TCP/IP' },
+    ],
+    correct: 'B',
+    explain: '正解！世界中のインターネットで実際に動いているのはTCP/IPです。OSI参照モデルは「7層で考える」という整理の仕方として今も生き続けています。',
+  },
+  {
+    q: 'OSIが実用面でTCP/IPに後れを取った、最大の理由は？',
+    choices: [
+      { key: 'A', text: '国際委員会での標準化に時間がかかりすぎたから' },
+      { key: 'B', text: '通信速度が遅かったから' },
+      { key: 'C', text: '誰も興味を持たなかったから' },
+    ],
+    correct: 'A',
+    explain: '正解！OSIは「完璧な設計」を目指す委員会方式で標準化に時間がかかり、TCP/IPはすでに実戦で動いて改良されていました。' ,
+  },
+  {
+    q: 'TCP/IPを育てたIETFの有名な合言葉は？',
+    choices: [
+      { key: 'A', text: '完璧な仕様、それから実装' },
+      { key: 'B', text: '大まかな合意と、動くコード（rough consensus and running code）' },
+      { key: 'C', text: '多数決による決定' },
+    ],
+    correct: 'B',
+    explain: '正解！「動くものを大事にする」という実利重視の文化が、TCP/IPの普及を後押ししました。',
+  },
+];
+
+const stage17 = {
+  id: 'stage17',
+  navLabel: '17. TCP/IP誕生秘話',
+  title: 'エピローグ：なぜTCP/IPが選ばれたのか',
+  missionText: 'ここまで学んだOSI参照モデルと、実際にインターネットで動いているTCP/IP。実は別々の歴史を歩んできた。\nねこ先生の解説を読んで、最後にクイズで理解を確認しよう。',
+  dialogue: [
+    { who: 'cat', text: 'ここまでOSI参照モデルの7つの層を1つずつ体験してきたね。でも、実は驚く事実がある——世界中のインターネットで実際に動いているのは、OSIのプロトコルじゃないんだ。' },
+    { who: 'rabbit', text: 'え！？ずっとOSIモデルで勉強してきたのに…どういうことですか？', variant: 'think' },
+    { who: 'cat', text: 'OSI参照モデルは、ISO（国際標準化機構）が1970年代後半から進めた、国際標準を作るための壮大なプロジェクトだった。各国の専門家が集まって、委員会で議論を重ねて「あるべき姿」を設計したんだ。' },
+    { who: 'rabbit', text: 'すごく丁寧に作られてそうですね。' },
+    { who: 'cat', text: 'ところが、その丁寧さが仇になった。仕様を固めるのに何年もかかり、実際に動くソフトウェアがなかなか登場しなかったんだ。' },
+    { who: 'rabbit', text: '理屈は立派でも、実際に使えなきゃ意味ないですもんね。' },
+    { who: 'cat', text: '一方、TCP/IPは全く違う生まれ方をした。1969年に始まったARPANet（米国防総省の研究ネットワーク）で、ヴィント・サーフとボブ・カーンが1974年に設計し、1970年代を通じて実際に動かしながら改良を重ねていったんだ。' },
+    { who: 'rabbit', text: '最初から「動くもの」を大事にしていたんですね。' },
+    { who: 'cat', text: 'IETF（Internet Engineering Task Force）という標準化団体には、今も<strong>「大まかな合意と、動くコード（rough consensus and running code）」</strong>という有名な合言葉がある。完璧な設計より、実際に動いて検証できることを重視する文化だよ。' },
+    { who: 'rabbit', text: 'OSIとは真逆の考え方ですね。' },
+    { who: 'cat', text: '1983年1月1日、ARPANetは一斉にTCP/IPへ切り替わった。「フラッグデー」と呼ばれる歴史的な日だよ。この時点でTCP/IPはすでに何年も実戦で鍛えられていた。' },
+    { who: 'rabbit', text: 'OSIが標準化を終える前に、もう世界で使われ始めていたんですね。' },
+    { who: 'cat', text: 'アメリカ政府はOSIを推進しようと、1990年に<strong>GOSIP</strong>（政府OSIプロファイル）という調達方針まで作って、政府機関にOSI製品を義務付けようとした。' },
+    { who: 'rabbit', text: 'それでもOSIは普及しなかったんですか？' },
+    { who: 'cat', text: 'うん。1990年代、大学や研究機関、そして商用インターネットが爆発的に広がっていったけど、そこで使われていたのは既に普及していたTCP/IP。UNIXにも無料の実装（BSD版）が組み込まれていて、誰でもすぐ使えたんだ。OSIの製品は高価で複雑、しかも普及が遅れていた。' },
+    { who: 'rabbit', text: 'せっかく国を挙げて推進しようとしたのに…' },
+    { who: 'cat', text: 'GOSIPは1995年に事実上撤回された。もう世の中はTCP/IPだらけになっていたからね。「勝ったのは、最初に十分良くて、既に広まっていた方」だったんだ。' },
+    { who: 'rabbit', text: 'じゃあ、OSI参照モデルはもう無駄だったんですか？', variant: 'think' },
+    { who: 'cat', text: 'いや、そこが面白いところ。プロトコルとしてのOSIは負けたけど、<strong>「7層に分けて考える」という整理の仕方（参照モデル）</strong>自体はとても優れていた。だからこそ今も教育や障害調査の共通言語として生き残っている——さっきの障害調査ステージで君がやった「層ごとに確認する」考え方が、まさにそれだよ。' },
+    { who: 'rabbit', text: 'なるほど…実際に走っているエンジンはTCP/IPだけど、地図として使われているのはOSIモデル、ってことですね！' },
+    { who: 'cat', text: 'いいまとめだね。最後にクイズで確認してみよう。' },
+  ],
+  revealFields: { ip: false, mac: false, ttl: false, port: false },
+  zones: [],
+  editableCables: false,
+  tablesToShow: [],
+  build() {
+    return {
+      devices: [
+        { id: 'osi', type: 'server', label: 'OSIモデル', x: 220, y: 240, ip: null, mac: null },
+        { id: 'tcpip', type: 'server', label: 'TCP/IP', x: 680, y: 240, ip: null, mac: null },
+      ],
+      edges: [],
+      runtime: { answered: [false, false, false], quizIndex: 0 },
+    };
+  },
+  renderActions(container, state, api) {
+    const r = state.stageRuntime;
+    const idx = r.quizIndex;
+
+    if (idx >= TCPIP_QUIZ.length) {
+      const done = document.createElement('span');
+      done.style.cssText = 'font-size:13px;color:var(--ok);align-self:center;';
+      done.textContent = 'すべてのクイズに正解しました！お疲れさまでした。';
+      container.appendChild(done);
+      return;
+    }
+
+    const item = TCPIP_QUIZ[idx];
+    const quizRow = document.createElement('div');
+    quizRow.className = 'quiz-row';
+    const q = document.createElement('span');
+    q.textContent = `Q${idx + 1}. ${item.q}`;
+    quizRow.appendChild(q);
+    for (const c of item.choices) {
+      const b = document.createElement('button');
+      b.className = 'secondary';
+      b.textContent = `${c.key}. ${c.text}`;
+      b.addEventListener('click', () => {
+        if (c.key === item.correct) {
+          api.log(item.explain, 'ok');
+          r.answered[idx] = true;
+          r.quizIndex += 1;
+          if (r.quizIndex >= TCPIP_QUIZ.length) {
+            api.setStatus('OSI参照モデルとTCP/IP、それぞれの歴史と役割を理解できました！', 'success');
+            api.completeStage();
+          }
+        } else {
+          api.log('不正解。会話の内容を思い出して、もう一度考えてみよう。', 'err');
+        }
+        api.refreshActions();
+      });
+      quizRow.appendChild(b);
+    }
+    container.appendChild(quizRow);
+  },
+};
+
 export const STAGES = [
   stage1, stage2, stage3, stage4, stage5, finalStage,
   stage7, stage8, stage9, stage10, stage11,
-  stage12, stage13, stage14, stage15, stage16,
+  stage12, stage13, stage14, stage15, stage16, stage17,
 ];
