@@ -265,10 +265,10 @@ export function renderMissionBanner(stageDef) {
 }
 
 const CHAR_IMAGES = {
-  cat: 'images/cat.png',
-  catThink: 'images/catThink.png',
-  rabbit: 'images/rabbit.png',
-  rabbitThink: 'images/rabbitThink.png',
+  cat: '/images/cat.png',
+  catThink: '/images/catThink.png',
+  rabbit: '/images/rabbit.png',
+  rabbitThink: '/images/rabbitThink.png',
 };
 
 function characterCard(who, variant) {
