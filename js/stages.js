@@ -1061,10 +1061,12 @@ function runTcpHandshake(state, api, { client, server, onDone }) {
   api.render();
 }
 
-function sendTcpData(state, api, { client, server, lose, onAck }) {
+function sendTcpData(state, api, { client, server, lose, loseAck, onAck }) {
   const seq = 101;
   const frame = { type: 'TCP-DATA', srcMac: client.mac, dstMac: server.mac, srcPort: 50000, dstPort: 80, seq, data: 'GET /index.html' };
-  api.log(`${client.label}がデータを送信しました（seq=${seq}）。`);
+  const seen = state.stageRuntime.serverSeen || (state.stageRuntime.serverSeen = {});
+  const isDuplicate = !!seen[seq];
+  api.log(`${client.label}が${isDuplicate ? '（再送）' : ''}データを送信しました（seq=${seq}）。`);
   if (lose) {
     const lost = createPacket({
       ...frame, fromId: client.id, toId: server.id,
@@ -1081,8 +1083,26 @@ function sendTcpData(state, api, { client, server, lose, onAck }) {
   const packet = createPacket({
     ...frame, fromId: client.id, toId: server.id,
     onArrive: (s) => {
-      api.log(`${server.label}がデータを受信し、ACKを返します。`, 'ok');
+      if (isDuplicate) {
+        api.log(`${server.label}：seq=${seq}は既に受信済みです。アプリには渡さず、ACKだけ送り直します（重複排除）。`, 'arp');
+      } else {
+        seen[seq] = true;
+        api.log(`${server.label}がデータを受信し、ACKを返します。`, 'ok');
+      }
       const ackFrame = { type: 'TCP-DATA-ACK', srcMac: server.mac, dstMac: client.mac, srcPort: 80, dstPort: 50000, ack: seq + 1 };
+      if (loseAck) {
+        const lostAck = createPacket({
+          ...ackFrame, fromId: server.id, toId: client.id,
+          onArrive: () => {
+            api.log('（デモ）このACKは途中で失われたことにします。', 'err');
+            api.log(`${client.label}：一定時間ACKが返ってこないため、同じデータ（seq=${seq}）を再送します（実際はサーバーに届いています）。`, 'arp');
+            sendTcpData(state, api, { client, server, lose: false, loseAck: false, onAck });
+          },
+        });
+        s.packets.push(lostAck);
+        api.render();
+        return;
+      }
       const ackPacket = createPacket({
         ...ackFrame, fromId: server.id, toId: client.id,
         onArrive: (s2) => {
@@ -1124,13 +1144,18 @@ const stage10 = {
   id: 'stage10',
   navLabel: '10. TCP',
   title: 'ステージ10：TCPハンドシェイク',
-  missionText: 'クライアントとサーバーは通信前に3ウェイハンドシェイクで合図を交わす。まずは接続を開始しよう。\nその後「わざと紛失させる」でパケットロスと再送を、UDPボタンでハンドシェイク無しの通信も比べてみよう。',
+  missionText: 'クライアントとサーバーは通信前に3ウェイハンドシェイクで合図を交わす。まずは接続を開始しよう。\nその後「わざと紛失させる」でデータ紛失時の再送を、「ACKだけ紛失」でACK紛失時の重複排除を、UDPボタンでハンドシェイク無しの通信も比べてみよう。',
   dialogue: [
     { who: 'cat', text: '本格的に通信を始める前に、TCPでは相手と3回の挨拶を交わすんだ。<strong>3ウェイハンドシェイク</strong>というよ。' },
     { who: 'rabbit', text: '3回も？律儀ですね。' },
     { who: 'cat', text: '「通信していい？」「いいよ、そっちは？」「こちらも準備完了」——これでお互いの準備が整ったことを確認するんだ。' },
     { who: 'rabbit', text: 'もし途中でパケットが消えちゃったら？', variant: 'think' },
     { who: 'cat', text: '安心して、TCPは一定時間反応がないと同じデータを<strong>再送</strong>してくれる。UDPだとそれが無いから、届かなくてもそのまま。両方試して違いを感じてみよう。' },
+    { who: 'rabbit', text: 'あ、でも、ACK（返事）自体も同じネットワークを通るんですよね？それも途中で消えることってあるんですか？', variant: 'think' },
+    { who: 'cat', text: '鋭い質問！その通り、ACKもただのパケットだから、途中で失われることは普通にある。しかも厄介なのは、送信側からは「データが届かなかったのか」「データは届いたけどACKだけ消えたのか」を区別できないことなんだ。' },
+    { who: 'rabbit', text: 'どちらにしても「ACKが来ない」ようにしか見えないから、同じように再送しちゃう…' },
+    { who: 'cat', text: 'そう、だから同じデータが2回届いてしまう可能性がある。これを防ぐために、TCPは各データに<strong>シーケンス番号</strong>を振っているんだ。サーバーは「このseqは前にも受け取った」と分かれば、アプリには渡さずACKだけ返すことで、重複を防いでいるんだよ。' },
+    { who: 'rabbit', text: 'なるほど…！実際に「ACKだけ紛失」のパターンも試してみたいです。' },
     { who: 'cat', text: 'IP自体は実は「ベストエフォート」——届けられたら届ける、程度の緩い約束しかしていない。パケットが消えても、順番が入れ替わっても、IPは知らんぷりなんだ。' },
     { who: 'rabbit', text: 'それじゃ困りますよね…アプリが毎回自分で確認しなきゃいけないんですか？' },
     { who: 'cat', text: 'まさにそこが問題だった。1974年、ヴィント・サーフとボブ・カーンが発表した論文で、信頼性の確保を1つの共通プロトコル（TCP）にまとめる設計を提案したんだ。おかげでアプリ開発者は、毎回同じ再送処理を書かなくて済むようになったんだよ。' },
@@ -1146,7 +1171,7 @@ const stage10 = {
         { id: 'srv', type: 'server', label: 'サーバー', x: 700, y: 240, ip: '203.0.113.20', mac: 'CC:CC:CC:CC:CC:80' },
       ],
       edges: [{ id: 'e1', a: 'pc', b: 'srv', connected: true }],
-      runtime: { handshakeDone: false, dataAckReceived: false, retransmitObserved: false },
+      runtime: { handshakeDone: false, dataAckReceived: false, retransmitObserved: false, ackLossObserved: false, serverSeen: {} },
     };
   },
   renderActions(container, state, api) {
@@ -1185,6 +1210,19 @@ const stage10 = {
       });
     });
     container.appendChild(loseBtn);
+
+    const loseAckBtn = document.createElement('button');
+    loseAckBtn.className = 'secondary';
+    loseAckBtn.textContent = 'データを送信する（ACKだけをわざと紛失させる）';
+    loseAckBtn.addEventListener('click', () => {
+      if (!state.stageRuntime.handshakeDone) { api.log('先にハンドシェイクを完了してください。', 'err'); return; }
+      state.stageRuntime.ackLossObserved = true;
+      sendTcpData(state, api, {
+        client: dev('pc'), server: dev('srv'), lose: false, loseAck: true,
+        onAck: () => { state.stageRuntime.dataAckReceived = true; checkStage10Win(state, api); api.render(); },
+      });
+    });
+    container.appendChild(loseAckBtn);
 
     const udpBtn = document.createElement('button');
     udpBtn.className = 'secondary';
