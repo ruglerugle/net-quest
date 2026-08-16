@@ -19,6 +19,9 @@ jobs:
           git clone --depth 1 https://github.com/ruglerugle/ruglerugle.github.io.git site/_hub
           cp site/_hub/index.html site/index.html
           cp -r site/_hub/images site/images
+          for f in sitemap.xml robots.txt 404.html; do
+            if [ -f "site/_hub/$f" ]; then cp "site/_hub/$f" "site/$f"; fi
+          done
           rm -rf site/_hub
 
       - name: Deploy to Cloudflare Pages
