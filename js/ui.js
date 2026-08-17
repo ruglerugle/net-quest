@@ -401,11 +401,12 @@ const BOOK_RECOMMEND = {
 export function renderBookRecommend() {
   const el = document.getElementById('book-recommend');
   el.innerHTML = `
-    <p class="book-recommend-label">参考文献</p>
+    <p class="book-recommend-label">参考文献［PR］</p>
     <div class="book-recommend-body">
       <p class="book-recommend-lead">もっと深く学びたい方へ</p>
       <a href="${BOOK_RECOMMEND.url}" target="_blank" rel="sponsored noopener">${escapeHtml(BOOK_RECOMMEND.title)}</a>
     </div>
+    <p class="pr-disclosure" style="font-size:10.5px;color:#8a8577;margin:8px 0 0;font-weight:600;line-height:1.5">※ Amazonのアソシエイトとして、当サイトは適格販売により収入を得ています。</p>
   `;
 }
 
