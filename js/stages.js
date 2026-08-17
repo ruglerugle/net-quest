@@ -336,6 +336,7 @@ function runDnsQuery(state, api, { client, sw, dns, domain, onResolved }) {
 
 const stage1 = {
   id: 'stage1',
+  partTitle: '第1部 町のネットワーク',
   navLabel: '1. ケーブル',
   title: 'ステージ1：ケーブルをつなげ',
   missionText: 'PC-AからPC-Bへメッセージを送ろう。通信するにはまず物理的な経路（ケーブル）が必要だ。\n配線をクリックすると抜き差しできる。',
@@ -741,7 +742,7 @@ const stage5 = {
 const finalStage = {
   id: 'final',
   navLabel: '6. 最終ミッション',
-  title: '最終ミッション：PCから別ネットワークのWebサーバーへpingを届けろ',
+  title: '第1部 最終ミッション：PCから別ネットワークのWebサーバーへpingを届けろ',
   missionText: '社内PCから、インターネット上のWebサーバー(203.0.113.20)へpingを届けよう。\nどこかの配線が切れているようだ……まず物理層から確認しよう。',
   dialogue: [
     { who: 'cat', text: 'ここまで学んだことを全部使う総まとめだよ。ケーブル、スイッチ、IP、ARP、ルーター…すべてが1つの通信の中で動いている。' },
@@ -812,6 +813,7 @@ const finalStage = {
 // ===================== ステージ7：DHCP局を作れ =====================
 
 const stage7 = {
+  partTitle: '第2部 インターネットとWeb',
   id: 'stage7',
   navLabel: '7. DHCP',
   title: 'ステージ7：DHCP局を作れ',
@@ -1305,7 +1307,7 @@ function runWebMission(state, api, { client, sw1, dns, rt, sw2, server, domain, 
 const stage11 = {
   id: 'stage11',
   navLabel: '11. Web最終',
-  title: '最終ミッション（Web編）：URLを入力してからページが表示されるまで',
+  title: '第2部 最終ミッション：URLを入力してからページが表示されるまで',
   missionText: 'shop.example.com へアクセスしよう。DNS問い合わせ→ARP→ルーティング→TCP 3ウェイハンドシェイク→HTTPリクエスト/応答が、1本の通信としてつながる様子を見てみよう。',
   dialogue: [
     { who: 'cat', text: 'さあ、ブラウザにURLを打ち込んでからページが表示されるまでの全工程を体験してみよう。' },
@@ -1563,6 +1565,7 @@ const stage12 = {
 // ===================== ステージ13：VLANで部署を分離 =====================
 
 const stage13 = {
+  partTitle: '第3部 運用の知恵と歴史',
   id: 'stage13',
   navLabel: '13. VLAN',
   title: 'ステージ13：VLANで部署を分離',

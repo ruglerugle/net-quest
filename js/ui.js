@@ -315,6 +315,13 @@ export function renderStageNav(stages, state, onSelect) {
     const locked = i > state.unlockedCount - 1;
     const active = i === state.stageIndex;
 
+    if (s.partTitle) {
+      const head = document.createElement('div');
+      head.className = 'side-part-head';
+      head.textContent = s.partTitle;
+      nav.appendChild(head);
+    }
+
     const btn = document.createElement('button');
     btn.className = `side-step${active ? ' active' : ''}${done ? ' done' : ''}${locked ? ' locked' : ''}`;
     btn.disabled = locked;
@@ -430,6 +437,7 @@ export function renderEnding(onReplay) {
       <p class="ending-note">「インターネットが壊れた！」と言われたら、もう層の順に切り分けられるはず。下の参考書は、今日たどったパケットの旅を理屈から支えてくれます。</p>
       <div class="ending-actions">
         <button type="button" id="ending-replay">↺ はじめから遊びなおす</button>
+        <a class="share" href="https://x.com/intent/post?text=${encodeURIComponent('NET QUEST 全17ステージクリア！🎉 パケットの旅でネットワークの仕組みを学べる無料学習ゲーム')}&url=${encodeURIComponent('https://informatics.habatakijuku.com/net-quest/')}" target="_blank" rel="noopener">𝕏 クリアを報告する</a>
         <a href="/">🧭 他のクエストも遊ぶ</a>
       </div>
     </div>
