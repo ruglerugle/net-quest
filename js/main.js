@@ -125,6 +125,7 @@ function loadStage(index) {
   ui.renderStageNav(STAGES, gameState, loadStage);
   ui.renderStageActions(document.getElementById('stage-actions'), def, gameState, API);
   render();
+  window.scrollTo({ top: 0, behavior: 'smooth' }); // 新しいステージの会話が目に入るように
 }
 
 document.getElementById('btn-play').addEventListener('click', () => { gameState.playing = true; });
