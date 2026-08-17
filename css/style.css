@@ -698,3 +698,65 @@ a.head-btn { text-decoration: none; display: inline-flex; align-items: center; j
   .dialog-row.right .dialog-bubble::before { left: -10px; right: auto; border-left: 0; border-right: 10px solid #cbd6e2; }
   .dialog-row.right .dialog-bubble::after { left: -8px; right: auto; border-left: 0; border-right: 9px solid #fff; }
 }
+
+/* ===== 全クリアまとめ画面 ===== */
+.main-area.ending-mode > *:not(#ending-screen):not(#book-recommend) { display: none !important; }
+.main-area.ending-mode > #ending-screen { display: block; }
+#ending-screen .ending-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  padding: 28px 26px 24px;
+  color: var(--text);
+  text-align: center;
+}
+#ending-screen .ending-emoji { font-size: 52px; line-height: 1; }
+#ending-screen h2 { margin: 10px 0 6px; font-size: 24px; color: var(--accent); }
+#ending-screen .ending-lead { margin: 0 0 18px; color: var(--text-dim); font-weight: 700; }
+#ending-screen .ending-list {
+  text-align: left;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px 18px;
+  line-height: 2.05;
+  font-weight: 700;
+  font-size: 14.5px;
+}
+#ending-screen .ending-list .layer {
+  display: inline-block;
+  min-width: 7.5em;
+  color: var(--accent);
+  font-weight: 900;
+}
+#ending-screen .ending-note {
+  margin: 16px 0 18px;
+  padding: 12px 14px;
+  border-left: 4px solid var(--accent);
+  background: var(--blue-zone);
+  text-align: left;
+  font-weight: 700;
+  border-radius: 0 8px 8px 0;
+}
+#ending-screen .ending-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+#ending-screen .ending-actions button,
+#ending-screen .ending-actions a {
+  display: inline-block;
+  padding: 12px 22px;
+  border-radius: 10px;
+  font-weight: 900;
+  font-size: 15px;
+  cursor: pointer;
+  text-decoration: none;
+}
+#ending-screen .ending-actions button {
+  border: 1px solid var(--border);
+  background: var(--panel-2);
+  color: var(--text);
+}
+#ending-screen .ending-actions a {
+  border: 1px solid #0d5c9c;
+  background: var(--accent);
+  color: #fff;
+}

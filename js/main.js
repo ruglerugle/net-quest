@@ -17,6 +17,11 @@ const gameState = {
   completed: false,
 };
 
+// 検証用: URLに ?all を付けると全ステージのロックを解除する（例: index.html?all）
+if (new URLSearchParams(location.search).has('all')) {
+  gameState.unlockedCount = STAGES.length;
+}
+
 function render() {
   ui.renderNetwork(gameState, { onPacketClick, onEdgeClick });
   ui.renderPacketDetail(gameState);
@@ -57,10 +62,18 @@ const API = {
     gameState.unlockedCount = Math.max(gameState.unlockedCount, gameState.stageIndex + 2);
     ui.renderStageNav(STAGES, gameState, loadStage);
   },
+  showEnding() {
+    if (!gameState.completed || gameState.stageIndex !== STAGES.length - 1) return;
+    ui.renderEnding(() => {
+      gameState.unlockedCount = 1;
+      loadStage(0);
+    });
+  },
 };
 
 function loadStage(index) {
   if (index > gameState.unlockedCount - 1) return;
+  ui.hideEnding();
   const def = STAGES[index];
   const built = def.build();
 

@@ -2104,6 +2104,11 @@ const stage17 = {
       done.style.cssText = 'font-size:13px;color:var(--ok);align-self:center;';
       done.textContent = 'すべてのクイズに正解しました！お疲れさまでした。';
       container.appendChild(done);
+      const finish = document.createElement('button');
+      finish.className = 'primary';
+      finish.textContent = '🎉 全ステージクリア！まとめを見る';
+      finish.addEventListener('click', () => api.showEnding());
+      container.appendChild(finish);
       return;
     }
 

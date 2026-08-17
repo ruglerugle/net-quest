@@ -407,3 +407,43 @@ function escapeHtml(str) {
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
   }[c]));
 }
+
+// ===== 全クリアまとめ画面 =====
+export function renderEnding(onReplay) {
+  const main = document.getElementById('main-area');
+  const el = document.getElementById('ending-screen');
+  el.hidden = false;
+  el.innerHTML = `
+    <div class="ending-card">
+      <div class="ending-emoji">🎉</div>
+      <h2>全ステージクリア！おめでとうございます</h2>
+      <p class="ending-lead">ケーブル1本から始まったパケットの旅は、世界中のWebサーバーまで届くようになりました。</p>
+      <div class="ending-list">
+        ✅ <span class="layer">物理層</span>ケーブルがつながって初めて通信できる<br>
+        ✅ <span class="layer">データリンク層</span>スイッチはMACアドレスで同じネットワーク内を配送する<br>
+        ✅ <span class="layer">ネットワーク層</span>IPアドレスとルーターで別のネットワークへ。ARPが橋渡し役<br>
+        ✅ <span class="layer">トランスポート層</span>ポート番号で相手のアプリを指定し、TCPが確実に届ける<br>
+        ✅ <span class="layer">アプリケーション層</span>DHCPが住所を配り、DNSが名前を解決し、HTTP/TLSがページを運ぶ<br>
+        ✅ <span class="layer">運用の知恵</span>VLAN・NAT・ファイアウォールで守り、障害調査は層の順にたどる<br>
+        ✅ <span class="layer">歴史</span>OSIは「考えるための地図」、TCP/IPは「実際に走るエンジン」
+      </div>
+      <p class="ending-note">「インターネットが壊れた！」と言われたら、もう層の順に切り分けられるはず。下の参考書は、今日たどったパケットの旅を理屈から支えてくれます。</p>
+      <div class="ending-actions">
+        <button type="button" id="ending-replay">↺ はじめから遊びなおす</button>
+        <a href="/">🧭 他のクエストも遊ぶ</a>
+      </div>
+    </div>
+  `;
+  el.querySelector('#ending-replay').addEventListener('click', onReplay);
+  main.classList.add('ending-mode');
+  window.scrollTo(0, 0);
+}
+
+export function hideEnding() {
+  const main = document.getElementById('main-area');
+  if (!main.classList.contains('ending-mode')) return;
+  main.classList.remove('ending-mode');
+  const el = document.getElementById('ending-screen');
+  el.hidden = true;
+  el.innerHTML = '';
+}
