@@ -650,9 +650,7 @@ a.head-btn { text-decoration: none; display: inline-flex; align-items: center; j
   line-height: 1.8;
   font-weight: 700;
   min-height: 64px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
+  align-content: center;
 }
 .dialog-bubble::before {
   content: "";
