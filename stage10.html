@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f2236">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-9RTQCP2HXM"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-9RTQCP2HXM');
+</script>
+<title>STAGE10 暗号とTLS ― ネットワーククエスト</title>
+<meta name="description" content="途中の機械に中身を盗み見られないための暗号と、偽のサーバーにだまされないための証明書。共通鍵暗号・鍵の受け渡し問題・公開鍵と鍵交換・認証局の署名の連鎖を、TLS の握手の流れで確かめる。">
+<link rel="canonical" href="https://informatics.habatakijuku.com/net-quest/stage10">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="ネットワーククエスト">
+<meta property="og:locale" content="ja_JP">
+<meta property="og:title" content="STAGE10 暗号とTLS ― ネットワーククエスト">
+<meta property="og:description" content="盗み見となりすましを防ぐ TLS。共通鍵・鍵交換・証明書と認証局の連鎖。">
+<meta property="og:url" content="https://informatics.habatakijuku.com/net-quest/stage10">
+<meta property="og:image" content="https://informatics.habatakijuku.com/images/ogp/net-quest.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌐</text></svg>">
+<link rel="stylesheet" href="design-system.css?v=20261108b">
+<link rel="stylesheet" href="lab.css?v=20261108b">
+<script src="js/stages.js?v=20261108b"></script>
+<script src="js/progress.js?v=20261108b"></script>
+<script src="js/labs.js?v=20261108b"></script>
+</head>
+<body>
+<div class="app-shell side-collapsed" id="app-shell">
+  <header class="game-header">
+    <div class="brand">
+      <div class="brand-title"><a class="head-reset home-badge" href="./" title="トップへ" aria-label="トップへ">🌐</a> <span>ネットワーククエスト</span></div>
+      <div class="brand-sub">STAGE 10 ― 暗号とTLS ―</div>
+    </div>
+    <div class="head-progress-wrap">
+      <div class="head-progress-label" id="progress-label">クリア 0 / 15</div>
+      <div class="head-progress" role="progressbar" aria-label="クリア済みステージ数" aria-valuemin="0" aria-valuemax="15" aria-valuenow="0"><div class="head-progress-fill" id="progress-fill" style="width:0%"></div></div>
+    </div>
+    <div class="header-actions">
+      <a class="head-reset" href="/" title="情報の冒険（シリーズの地図）へ">🧭 地図</a>
+      <button class="head-reset" id="btn-reset-all">🔄 最初から</button>
+      <button class="head-reset" id="head-nav-toggle" title="ステージ一覧の表示切替">☰ ナビ</button>
+    </div>
+  </header>
+
+  <div class="game-layout">
+    <div class="side-backdrop" id="side-backdrop"></div>
+    <aside class="side-panel">
+      <div class="side-head">
+        <button class="side-toggle" id="sidebar-toggle" title="ステージ一覧の表示切替" aria-label="ステージ一覧の表示切替">☰</button>
+        <span class="side-head-text">📚 ステージ一覧</span>
+      </div>
+      <div class="side-list" id="side-list"></div>
+    </aside>
+
+    <main class="main-area">
+      <div class="chapter-head">
+        <span class="chapter-badge">STAGE 10</span><h1 class="chapter-title">暗号とTLS</h1>
+        <div class="chapter-sub">盗み見と、なりすましを防ぐ</div>
+      </div>
+
+      <div class="mission-box">
+        <div class="mission-label">🎯 ミッション</div>
+        <div class="mission-text">TLS が「盗み見」と「なりすまし」をそれぞれどう防ぐかを説明できるようになろう。TLS の握手を最後まで追い、確認クイズに全問正解すれば合格。</div>
+        <span class="mission-status" id="mission-status">未達成</span>
+      </div>
+
+      <div class="dialogue-scene">
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">ここから第3部だ。STAGE5 で見たように、パケットは何台ものルーターを中継して届く。カフェの Wi-Fi なら、同じ電波をだれでも受け取れる。中身がそのまま書いてあったら、どうなる？</div>
+        </div>
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbit.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble">パスワードもメッセージも、途中の機械や近くの人に読まれてしまいます。</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">守るべきことは2つある。1つは<strong>盗み見</strong>を防ぐこと。もう1つは<strong>なりすまし</strong>を防ぐこと。きみが銀行のサイトだと思ってつないだ相手が、実は偽物だったら、いくら暗号にしても、暗号を解くのは偽物自身だからね。</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">まず盗み見から。送る側と受け取る側が同じ<strong>鍵</strong>（暗号にしたり元に戻したりするための秘密の数）を持っていれば、中身を混ぜて送れる。これを<strong>共通鍵暗号</strong>と呼ぶ。今の共通鍵暗号（AES など）は、鍵を知らなければ、世界中のコンピュータで何億年かけても解けない。</div>
+        </div>
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbitThink.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble"> でも、その鍵を、最初にどうやって相手に渡すんですか？ 鍵をそのまま送ったら、途中で鍵ごと盗み見されます。</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">それが長いあいだ大問題だった。解決したのが<strong>鍵交換</strong>という方法だ。絵の具でたとえよう。2人が、みんなに見える「共通の色」と、自分だけの「秘密の色」を用意する。それぞれ「共通の色＋自分の秘密の色」を混ぜて、相手に送る。受け取った色に自分の秘密の色を混ぜると、2人とも「共通＋秘密A＋秘密B」という<strong>同じ色</strong>になる。</div>
+        </div>
+      </div>
+<div class="formula-box">
+  <span class="step">A が送る：共通＋秘密A　／　B が送る：共通＋秘密B（途中の人に見えるのはこの2つだけ）</span>
+  <span class="step">A：（共通＋秘密B）＋秘密A ＝ 共通＋秘密A＋秘密B　／　B：（共通＋秘密A）＋秘密B ＝ 同じ色</span>
+  <span class="step">途中の人は、混ざった色から秘密の色を取り出せない（絵の具は混ぜるのは簡単、分けるのは難しい）→ 同じ鍵を、送らずに共有できる</span>
+</div>
+      <div class="dialogue-scene">
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">実際には絵の具の代わりに、「計算するのは簡単、逆向きはとても難しい」数の計算を使う。この考え方は1976年にディフィーとヘルマンが発表した。</div>
+        </div>
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbit.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble">盗み見はこれで防げる。でも、なりすましは？ 偽物が相手のふりをして鍵交換をしてきたら、偽物と鍵を共有してしまいます。</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">そこで<strong>証明書</strong>を使う。証明書は「このサーバーは本物の www.example.com だ」という書類で、信頼できる<strong>認証局</strong>（CA）が<strong>電子署名</strong>をしている。電子署名は、認証局だけが持つ秘密の鍵で作り、だれでも持てる<strong>公開鍵</strong>で正しさを確かめられる、という仕組みだ。</div>
+        </div>
+      </div>
+<div class="formula-box">
+  <span class="step">サーバーの証明書 ← 中間認証局が署名 ← ルート認証局が署名</span>
+  <span class="step">ルート認証局の公開鍵は、OS やブラウザに最初から入っている → 署名を順にたどって本物か確かめる（署名の連鎖）</span>
+  <span class="step">さらに、証明書に書かれた名前が、いまつないでいるサイトの名前と一致するかも確かめる</span>
+</div>
+<div class="lab" id="lad-s10"></div>
+<script>
+Ladder.mount(document.getElementById("lad-s10"), {
+  id: "net-s10-tls", title: "TLS の握手（考え方を単純にしたもの）",
+  actors: ["ブラウザ", "Webサーバー"],
+  steps: [
+    { from: 0, to: 1, label: "ClientHello ＋ 鍵交換の材料A", detail: "使える暗号の種類と、鍵交換の材料（共通＋秘密A にあたるもの）を送る。" },
+    { from: 1, to: 0, label: "ServerHello ＋ 材料B ＋ 証明書 ＋ 署名", detail: "サーバーも材料（共通＋秘密B）を返し、証明書と、「この材料は自分が送った」という署名を付ける。" },
+    { from: 0, to: 0, label: "", detail: "ブラウザは、証明書の署名をルート認証局までたどって確かめ、名前が www.example.com と一致するかも見る。偽物ならここで警告を出して止める。" },
+    { from: 0, to: 0, label: "", detail: "両方が手元で同じ鍵を計算した。鍵そのものは一度も送っていない。" },
+    { from: 0, to: 1, label: "暗号化した GET /index.html", detail: "ここからは共通鍵暗号で、中身を混ぜて送る。途中の機械には意味の分からない並びにしか見えない。" },
+    { from: 1, to: 0, label: "暗号化した 200 OK ＋ HTML", detail: "返事も暗号のまま届き、ブラウザだけが元に戻せる。これが https の中身。" }
+  ]
+});
+</script>
+      <div class="dialogue-scene">
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbit.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble">暗号で「盗み見」を、証明書と署名で「なりすまし」を防ぐ。2つを組み合わせているんですね。</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">そう。この決まりを <strong>TLS</strong>（Transport Layer Security）と呼び、HTTP を TLS で包んだものが HTTPS だ。注意しておくと、HTTPS で守られるのは「通り道」と「相手が名前どおりのサイトか」であって、そのサイト自体が良いサイトかどうかまでは保証しない。本物の名前で作られた悪いサイトもあるからね。</div>
+        </div>
+      </div>
+
+      <h2 class="quiz-head">確認クイズ</h2>
+      <div class="quiz-card" data-quiz>
+        <p class="quiz-q">Q1. TLS が防ぐ2つのことの組み合わせとして正しいのは？</p>
+        <div class="choice-list">
+          <button class="choice-btn">盗み見（暗号で）と、なりすまし（証明書と署名で）</button>
+          <button class="choice-btn">盗み見（証明書で）と、パケットの消失（暗号で）</button>
+          <button class="choice-btn">ウイルス（暗号で）と、なりすまし（ポート番号で）</button>
+        </div>
+        <div class="quiz-explain" hidden>正解！ 中身を共通鍵暗号で守り、相手が本物かを認証局の署名の連鎖で確かめる。</div>
+      </div>
+      <div class="quiz-card" data-quiz>
+        <p class="quiz-q">Q2. 鍵交換の良いところは？</p>
+        <div class="choice-list">
+          <button class="choice-btn">鍵をそのまま速く送れる</button>
+          <button class="choice-btn">鍵が無くても暗号が解ける</button>
+          <button class="choice-btn">鍵そのものを送らずに、2人が同じ鍵を手元で作れる</button>
+        </div>
+        <div class="quiz-explain" hidden>正解！ 途中に見えるのは混ぜたあとの材料だけ。そこから秘密を取り出すのはとても難しい。</div>
+      </div>
+      <div class="quiz-card" data-quiz>
+        <p class="quiz-q">Q3. ブラウザが証明書を本物だと判断できる理由は？</p>
+        <div class="choice-list">
+          <button class="choice-btn">証明書がサーバーから送られてきたから</button>
+          <button class="choice-btn">署名をたどると、ブラウザや OS に最初から入っているルート認証局の公開鍵で確かめられるから</button>
+          <button class="choice-btn">証明書の中にパスワードが書いてあるから</button>
+        </div>
+        <div class="quiz-explain" hidden>正解！ 信頼の出発点は、最初から入っているルート認証局。そこから署名を順にたどって確かめる。</div>
+      </div>
+
+      <div class="stage-nav">
+        <a class="btn" href="stage9.html">← 前のステージ</a>
+        <button class="btn btn-primary" id="btn-next" disabled>次へ →</button>
+      </div>
+
+      <div id="book-recommend"></div>
+    </main>
+  </div>
+</div>
+
+<script>QUEST.initStagePage(10);</script>
+
+<script src="https://my.habatakijuku.com/sync.js" defer></script>
+</body>
+</html>

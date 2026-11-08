@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f2236">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-9RTQCP2HXM"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-9RTQCP2HXM');
+</script>
+<title>STAGE15 層で切り分ける ― ネットワーククエスト</title>
+<meta name="description" content="旅のまとめ。ここまでの道具を層の地図（TCP/IP の4層と OSI の7層）に並べ、「つながらない」ときに下の層から順に確かめる切り分け方を、3つの故障で練習する。インターネットの歴史も少し振り返る。">
+<link rel="canonical" href="https://informatics.habatakijuku.com/net-quest/stage15">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="ネットワーククエスト">
+<meta property="og:locale" content="ja_JP">
+<meta property="og:title" content="STAGE15 層で切り分ける ― ネットワーククエスト">
+<meta property="og:description" content="層の地図でまとめる。つながらないとき、下の層から順に確かめる。">
+<meta property="og:url" content="https://informatics.habatakijuku.com/net-quest/stage15">
+<meta property="og:image" content="https://informatics.habatakijuku.com/images/ogp/net-quest.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌐</text></svg>">
+<link rel="stylesheet" href="design-system.css?v=20261108b">
+<link rel="stylesheet" href="lab.css?v=20261108b">
+<script src="js/stages.js?v=20261108b"></script>
+<script src="js/progress.js?v=20261108b"></script>
+<script src="js/labs.js?v=20261108b"></script>
+</head>
+<body>
+<div class="app-shell side-collapsed" id="app-shell">
+  <header class="game-header">
+    <div class="brand">
+      <div class="brand-title"><a class="head-reset home-badge" href="./" title="トップへ" aria-label="トップへ">🌐</a> <span>ネットワーククエスト</span></div>
+      <div class="brand-sub">STAGE 15 ― 層で切り分ける ―</div>
+    </div>
+    <div class="head-progress-wrap">
+      <div class="head-progress-label" id="progress-label">クリア 0 / 15</div>
+      <div class="head-progress" role="progressbar" aria-label="クリア済みステージ数" aria-valuemin="0" aria-valuemax="15" aria-valuenow="0"><div class="head-progress-fill" id="progress-fill" style="width:0%"></div></div>
+    </div>
+    <div class="header-actions">
+      <a class="head-reset" href="/" title="情報の冒険（シリーズの地図）へ">🧭 地図</a>
+      <button class="head-reset" id="btn-reset-all">🔄 最初から</button>
+      <button class="head-reset" id="head-nav-toggle" title="ステージ一覧の表示切替">☰ ナビ</button>
+    </div>
+  </header>
+
+  <div class="game-layout">
+    <div class="side-backdrop" id="side-backdrop"></div>
+    <aside class="side-panel">
+      <div class="side-head">
+        <button class="side-toggle" id="sidebar-toggle" title="ステージ一覧の表示切替" aria-label="ステージ一覧の表示切替">☰</button>
+        <span class="side-head-text">📚 ステージ一覧</span>
+      </div>
+      <div class="side-list" id="side-list"></div>
+    </aside>
+
+    <main class="main-area">
+      <div class="chapter-head">
+        <span class="chapter-badge">STAGE 15</span><h1 class="chapter-title">層で切り分ける</h1>
+        <div class="chapter-sub">障害調査と全体の地図</div>
+      </div>
+
+      <div class="mission-box">
+        <div class="mission-label">🎯 ミッション</div>
+        <div class="mission-text">ここまでの道具を層に並べ、障害を下の層から切り分ける方法を説明できるようになろう。3つの故障の原因を検査で突き止め、確認クイズに全問正解すれば合格。</div>
+        <span class="mission-status" id="mission-status">未達成</span>
+      </div>
+
+      <div class="dialogue-scene">
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">最後のステージだ。STAGE1 で、ネットワークの仕事を層に分けると話したね。ここまでの道具を、層の地図に並べてみよう。</div>
+        </div>
+      </div>
+<div class="formula-box">
+  <span class="step"><strong>アプリケーション</strong>：HTTP・DNS・DHCP・TLS（の上の HTTPS）</span>
+  <span class="step"><strong>トランスポート</strong>：TCP・UDP（ポート番号）</span>
+  <span class="step"><strong>ネットワーク（インターネット）</strong>：IPv4・IPv6・ルーター・NAT</span>
+  <span class="step"><strong>リンク</strong>（データリンク＋物理）：MAC アドレス・スイッチ・ARP・VLAN・ケーブル・Wi-Fi</span>
+  <span class="step">これがインターネットで実際に使われている <strong>TCP/IP の4層</strong>の分け方</span>
+</div>
+      <div class="dialogue-scene">
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbit.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble">STAGE1 では5つに分けていましたが、こちらは4つなんですね。</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">分け方は1つではないんだ。教科書でよく見るのは <strong>OSI 参照モデル</strong>という7層の分け方で、1980年代に国際的な標準として決められた。物理・データリンク・ネットワーク・トランスポートは同じで、その上を「セッション」「プレゼンテーション」「アプリケーション」の3つに分けている。ただ、実際のインターネットでは、その3つは1つのアプリの中でまとめて扱われることが多く、この旅でも別々には扱っていない。OSI は「どの層の話か」を言うための共通の言葉として、いまも広く使われているよ。</div>
+        </div>
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbit.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble">TLS はどの層ですか？ 暗号にするのは、HTTP より下の仕事のような気もします。</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">いい質問だね。TLS は TCP の上、HTTP の下に入る。だから、どちらの層とも言い切りにくく、「トランスポートとアプリケーションの間」と説明されることが多い。層の分け方は、きっちりした決まりというより、考えるための地図なんだ。</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">この地図が一番役に立つのは、<strong>つながらない</strong>ときだ。「Web ページが開けない」の原因は、ケーブルかもしれないし、DNS かもしれないし、相手のサーバーかもしれない。当てずっぽうに調べるのではなく、<strong>下の層から順に</strong>確かめる。</div>
+        </div>
+      </div>
+<div class="formula-box">
+  <span class="step">① リンク・ネットワーク：線や Wi-Fi はつながっているか。IP アドレスをもらえているか（169.254.x.x は DHCP の失敗、STAGE6）</span>
+  <span class="step">② ネットワーク：ゲートウェイや相手の IP アドレスに ping が届くか</span>
+  <span class="step">③ アプリケーション：名前が引けるか（DNS）。サーバーが返事をするか</span>
+</div>
+<div class="lab" data-lab="trouble" data-id="net-s15-trouble"></div>
+      <div class="dialogue-scene">
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbit.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble">名前で開けないのに IP アドレスあてなら届くなら、壊れているのは DNS。下の層が全部正常で相手にだけ届かないなら、相手の側。下から確かめると、原因の場所が自然に絞れていきますね。</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">そう。最後に、少しだけ歴史を振り返っておこう。1969年、アメリカの4つの大学をつないだ ARPANET が、インターネットの始まりとされている。1974年にサーフとカーンが TCP/IP の考え方を発表し、1983年に ARPANET が TCP/IP に切り替わった。1991年にティム・バーナーズ＝リーが Web を公開し、そこから世界中に広がった。どの時代も、新しい問題（住所不足、盗み見、速さ）が出るたびに、層のどこかを取り替えたり足したりしながら、全体を止めずに育ってきたんだ。</div>
+        </div>
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbit.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble">層に分けてあったから、全体を止めずに一部だけ取り替えられた。STAGE1 で聞いた「層に分ける良さ」が、こういうことだったんですね。</div>
+        </div>
+      </div>
+
+      <h2 class="quiz-head">確認クイズ</h2>
+      <div class="quiz-card" data-quiz>
+        <p class="quiz-q">Q1. Web ページが開けないとき、下の層から確かめる理由は？</p>
+        <div class="choice-list">
+          <button class="choice-btn">上の層を調べるには、管理者の許可が必要だから</button>
+          <button class="choice-btn">下の層が動いていないと上の層は必ず動かないので、下から確かめれば原因の場所を順に絞れるから</button>
+          <button class="choice-btn">下の層のほうが故障しやすいと決まっているから</button>
+        </div>
+        <div class="quiz-explain" hidden>正解！ ケーブルが抜けていれば DNS も HTTP も動かない。下から正常を確かめていけば、最初に異常が出た層が原因の候補になる。</div>
+      </div>
+      <div class="quiz-card" data-quiz>
+        <p class="quiz-q">Q2. 名前（example.com）では開けないが、IP アドレスあての ping は届く。原因として一番疑わしいのは？</p>
+        <div class="choice-list">
+          <button class="choice-btn">DNS（名前から IP アドレスを調べるところ）</button>
+          <button class="choice-btn">ケーブル</button>
+          <button class="choice-btn">自分の PC の IP アドレス</button>
+        </div>
+        <div class="quiz-explain" hidden>正解！ IP アドレスで届くなら、下の層は動いている。名前で失敗するなら、名前の解決（DNS）を疑う。</div>
+      </div>
+      <div class="quiz-card" data-quiz>
+        <p class="quiz-q">Q3. OSI 参照モデル（7層）について正しいのは？</p>
+        <div class="choice-list">
+          <button class="choice-btn">実際のインターネットは、7つの層をそれぞれ別のプログラムで動かしている</button>
+          <button class="choice-btn">OSI 参照モデルは、TCP/IP より新しく作られた</button>
+          <button class="choice-btn">層を説明する共通の言葉として使われるが、実際のインターネットは TCP/IP の4層の分け方で作られている</button>
+        </div>
+        <div class="quiz-explain" hidden>正解！ OSI は1980年代の国際標準。セッション・プレゼンテーションの層は、実際にはアプリの中でまとめて扱われることが多い。</div>
+      </div>
+
+      <div class="stage-nav">
+        <a class="btn" href="stage14.html">← 前のステージ</a>
+        <button class="btn btn-primary" id="btn-next" disabled>まとめへ →</button>
+      </div>
+
+      <div id="book-recommend"></div>
+    </main>
+  </div>
+</div>
+
+<script>QUEST.initStagePage(15);</script>
+
+<script src="https://my.habatakijuku.com/sync.js" defer></script>
+</body>
+</html>

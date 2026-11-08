@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f2236">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-9RTQCP2HXM"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-9RTQCP2HXM');
+</script>
+<title>STAGE6 DHCP ― ネットワーククエスト</title>
+<meta name="description" content="Wi-Fi につないだだけで IP アドレスが決まるのはなぜか。まだ住所の無い機械が全員に呼びかけ、DHCP サーバーから IP アドレス・マスク・ゲートウェイ・DNS サーバーを借りる4つのやり取り（DORA）を1歩ずつ確かめる。">
+<link rel="canonical" href="https://informatics.habatakijuku.com/net-quest/stage6">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="ネットワーククエスト">
+<meta property="og:locale" content="ja_JP">
+<meta property="og:title" content="STAGE6 DHCP ― ネットワーククエスト">
+<meta property="og:description" content="住所を自動でもらう DHCP。発見・提案・要求・承認の4つのやり取り。">
+<meta property="og:url" content="https://informatics.habatakijuku.com/net-quest/stage6">
+<meta property="og:image" content="https://informatics.habatakijuku.com/images/ogp/net-quest.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌐</text></svg>">
+<link rel="stylesheet" href="design-system.css?v=20261108b">
+<link rel="stylesheet" href="lab.css?v=20261108b">
+<script src="js/stages.js?v=20261108b"></script>
+<script src="js/progress.js?v=20261108b"></script>
+<script src="js/labs.js?v=20261108b"></script>
+</head>
+<body>
+<div class="app-shell side-collapsed" id="app-shell">
+  <header class="game-header">
+    <div class="brand">
+      <div class="brand-title"><a class="head-reset home-badge" href="./" title="トップへ" aria-label="トップへ">🌐</a> <span>ネットワーククエスト</span></div>
+      <div class="brand-sub">STAGE 6 ― DHCP ―</div>
+    </div>
+    <div class="head-progress-wrap">
+      <div class="head-progress-label" id="progress-label">クリア 0 / 15</div>
+      <div class="head-progress" role="progressbar" aria-label="クリア済みステージ数" aria-valuemin="0" aria-valuemax="15" aria-valuenow="0"><div class="head-progress-fill" id="progress-fill" style="width:0%"></div></div>
+    </div>
+    <div class="header-actions">
+      <a class="head-reset" href="/" title="情報の冒険（シリーズの地図）へ">🧭 地図</a>
+      <button class="head-reset" id="btn-reset-all">🔄 最初から</button>
+      <button class="head-reset" id="head-nav-toggle" title="ステージ一覧の表示切替">☰ ナビ</button>
+    </div>
+  </header>
+
+  <div class="game-layout">
+    <div class="side-backdrop" id="side-backdrop"></div>
+    <aside class="side-panel">
+      <div class="side-head">
+        <button class="side-toggle" id="sidebar-toggle" title="ステージ一覧の表示切替" aria-label="ステージ一覧の表示切替">☰</button>
+        <span class="side-head-text">📚 ステージ一覧</span>
+      </div>
+      <div class="side-list" id="side-list"></div>
+    </aside>
+
+    <main class="main-area">
+      <div class="chapter-head">
+        <span class="chapter-badge">STAGE 6</span><h1 class="chapter-title">DHCP</h1>
+        <div class="chapter-sub">住所を自動でもらう</div>
+      </div>
+
+      <div class="mission-box">
+        <div class="mission-label">🎯 ミッション</div>
+        <div class="mission-text">DHCP で IP アドレスなどが自動で決まる流れ（DORA）と、借りる期間（リース）の意味を説明できるようになろう。DHCP のやり取りを最後まで追い、確認クイズに全問正解すれば合格。</div>
+        <span class="mission-status" id="mission-status">未達成</span>
+      </div>
+
+      <div class="dialogue-scene">
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">ここから第2部だ。家の Wi-Fi につないだスマホは、何も設定しなくても IP アドレス・サブネットマスク・デフォルトゲートウェイが決まっている。だれが決めているんだろう。</div>
+        </div>
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbit.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble">全部の機械に人が手で設定していたら大変ですよね。カフェの Wi-Fi なら、来る人のスマホがどんどん変わるのに。</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">そう。そこで、ネットワークに1台、住所を配る係の <strong>DHCP サーバー</strong>を置く（家ではたいてい Wi-Fi ルーターが兼ねている）。新しくつないだ機械は、DHCP サーバーから住所を<strong>借りる</strong>。</div>
+        </div>
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbit.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble">でも、まだ IP アドレスが無いのに、どうやって DHCP サーバーと話すんですか？ DHCP サーバーの住所も知らないし。</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">いいところに気づいたね。だから最初は、あて先を「全員」にして呼びかける。STAGE2 のブロードキャストだ。やり取りは4つあって、頭文字をとって <strong>DORA</strong> と覚える。</div>
+        </div>
+      </div>
+<div class="formula-box">
+  <span class="step">① Discover（発見）：新しい機械 →（全員）「DHCP サーバーはいますか？」</span>
+  <span class="step">② Offer（提案）：DHCP サーバー →「192.168.1.23 はどうですか」</span>
+  <span class="step">③ Request（要求）：新しい機械 →（全員）「192.168.1.23 をください」</span>
+  <span class="step">④ Ack（承認）：DHCP サーバー →「どうぞ。期限は24時間。マスク・ゲートウェイ・DNS サーバーはこれ」</span>
+</div>
+<div class="lab" id="lad-s6"></div>
+<script>
+Ladder.mount(document.getElementById("lad-s6"), {
+  id: "net-s6-dhcp", title: "DHCP で住所を借りる（DORA）",
+  actors: ["新しいスマホ", "ほかの機械", "DHCPサーバー"],
+  start: "スマホはまだ IP アドレスを持っていない。",
+  steps: [
+    { from: 0, to: [1, 2], label: "① Discover（全員へ）", detail: "送り元の IP はまだ無いので 0.0.0.0、あて先は全員。「DHCP サーバーはいますか？」" },
+    { from: 2, to: 0, label: "② Offer", detail: "DHCP サーバーが、空いている住所 192.168.1.23 を提案した。" },
+    { from: 0, to: [1, 2], label: "③ Request（全員へ）", detail: "「192.168.1.23 をください」。全員に送るのは、DHCP サーバーが複数いたとき、選ばなかったサーバーにも知らせるため。" },
+    { from: 2, to: 0, label: "④ Ack", detail: "承認。スマホは IP アドレス・マスク・ゲートウェイ・DNS サーバーを設定した。", table: { "スマホの設定": [["IP アドレス", "192.168.1.23"], ["サブネットマスク", "255.255.255.0"], ["デフォルトゲートウェイ", "192.168.1.1"], ["DNS サーバー", "192.168.1.1"], ["借りる期限", "24時間"]] } }
+  ]
+});
+</script>
+      <div class="dialogue-scene">
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbit.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble">「借りる」なので、期限があるんですね。</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">そう。この期限を<strong>リース期間</strong>と呼ぶ。期限の半分くらいが過ぎると、機械は「延長してください」と頼む。もうネットワークにいない機械の住所は、期限が切れると回収されて、ほかの機械に貸せる。限られた住所を、いま使っている機械だけで分け合う仕組みなんだ。</div>
+        </div>
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbit.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble">DHCP サーバーが見つからなかったら、どうなるんですか？</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">多くの OS は、169.254 で始まる住所を自分で仮に付ける。でも、これはそのネットワークの中でしか使えない仮の住所なので、インターネットにはつながらない。「169.254.x.x になっている」は、DHCP で住所がもらえなかった印だ。STAGE15 の障害調査で役に立つよ。</div>
+        </div>
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbitThink.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble"> プリンターやサーバーみたいに、いつも同じ住所でいてほしい機械は？ 毎回変わったら、みんながどこに印刷すればいいか分からなくなります。</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">そういう機械には、手で決まった住所を設定するか、DHCP サーバーに「この MAC アドレスの機械には、いつもこの住所」と予約しておく。</div>
+        </div>
+      </div>
+
+      <h2 class="quiz-head">確認クイズ</h2>
+      <div class="quiz-card" data-quiz>
+        <p class="quiz-q">Q1. DHCP の最初の Discover を全員あて（ブロードキャスト）に送る理由は？</p>
+        <div class="choice-list">
+          <button class="choice-btn">全員に IP アドレスを配るため</button>
+          <button class="choice-btn">新しい機械はまだ自分の住所も DHCP サーバーの住所も知らないから</button>
+          <button class="choice-btn">速く届くから</button>
+        </div>
+        <div class="quiz-explain" hidden>正解！ 相手も自分の住所も分からないので、全員に呼びかけるしかない。</div>
+      </div>
+      <div class="quiz-card" data-quiz>
+        <p class="quiz-q">Q2. DHCP の4つのやり取りの順番は？</p>
+        <div class="choice-list">
+          <button class="choice-btn">Discover → Offer → Request → Ack</button>
+          <button class="choice-btn">Request → Offer → Discover → Ack</button>
+          <button class="choice-btn">Offer → Discover → Ack → Request</button>
+        </div>
+        <div class="quiz-explain" hidden>正解！ 発見→提案→要求→承認。頭文字で DORA。</div>
+      </div>
+      <div class="quiz-card" data-quiz>
+        <p class="quiz-q">Q3. 機械の IP アドレスが 169.254.x.x になっていたら、考えられることは？</p>
+        <div class="choice-list">
+          <button class="choice-btn">インターネットに正常につながっている</button>
+          <button class="choice-btn">IPv6 に切り替わった</button>
+          <button class="choice-btn">DHCP サーバーから住所をもらえず、自分で仮の住所を付けた</button>
+        </div>
+        <div class="quiz-explain" hidden>正解！ 169.254 は DHCP に失敗したときの仮の住所。そのネットワークの外へは出られない。</div>
+      </div>
+
+      <div class="stage-nav">
+        <a class="btn" href="stage5.html">← 前のステージ</a>
+        <button class="btn btn-primary" id="btn-next" disabled>次へ →</button>
+      </div>
+
+      <div id="book-recommend"></div>
+    </main>
+  </div>
+</div>
+
+<script>QUEST.initStagePage(6);</script>
+
+<script src="https://my.habatakijuku.com/sync.js" defer></script>
+</body>
+</html>

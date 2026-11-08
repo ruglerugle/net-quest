@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f2236">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-9RTQCP2HXM"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-9RTQCP2HXM');
+</script>
+<title>STAGE1 信号と層 ― ネットワーククエスト</title>
+<meta name="description" content="ネットワークの旅の出発点。0と1を電気・光・電波の信号で送るしくみ、同時に送るとぶつかる問題、そして「届ける」という大仕事を役割ごとの層に分けて考える理由を知る。">
+<link rel="canonical" href="https://informatics.habatakijuku.com/net-quest/stage1">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="ネットワーククエスト">
+<meta property="og:locale" content="ja_JP">
+<meta property="og:title" content="STAGE1 信号と層 ― ネットワーククエスト">
+<meta property="og:description" content="0と1を線で送る。ネットワークを層に分けて考える理由。">
+<meta property="og:url" content="https://informatics.habatakijuku.com/net-quest/stage1">
+<meta property="og:image" content="https://informatics.habatakijuku.com/images/ogp/net-quest.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌐</text></svg>">
+<link rel="stylesheet" href="design-system.css?v=20261108b">
+<link rel="stylesheet" href="lab.css?v=20261108b">
+<script src="js/stages.js?v=20261108b"></script>
+<script src="js/progress.js?v=20261108b"></script>
+<script src="js/labs.js?v=20261108b"></script>
+</head>
+<body>
+<div class="app-shell side-collapsed" id="app-shell">
+  <header class="game-header">
+    <div class="brand">
+      <div class="brand-title"><a class="head-reset home-badge" href="./" title="トップへ" aria-label="トップへ">🌐</a> <span>ネットワーククエスト</span></div>
+      <div class="brand-sub">STAGE 1 ― 信号と層 ―</div>
+    </div>
+    <div class="head-progress-wrap">
+      <div class="head-progress-label" id="progress-label">クリア 0 / 15</div>
+      <div class="head-progress" role="progressbar" aria-label="クリア済みステージ数" aria-valuemin="0" aria-valuemax="15" aria-valuenow="0"><div class="head-progress-fill" id="progress-fill" style="width:0%"></div></div>
+    </div>
+    <div class="header-actions">
+      <a class="head-reset" href="/" title="情報の冒険（シリーズの地図）へ">🧭 地図</a>
+      <button class="head-reset" id="btn-reset-all">🔄 最初から</button>
+      <button class="head-reset" id="head-nav-toggle" title="ステージ一覧の表示切替">☰ ナビ</button>
+    </div>
+  </header>
+
+  <div class="game-layout">
+    <div class="side-backdrop" id="side-backdrop"></div>
+    <aside class="side-panel">
+      <div class="side-head">
+        <button class="side-toggle" id="sidebar-toggle" title="ステージ一覧の表示切替" aria-label="ステージ一覧の表示切替">☰</button>
+        <span class="side-head-text">📚 ステージ一覧</span>
+      </div>
+      <div class="side-list" id="side-list"></div>
+    </aside>
+
+    <main class="main-area">
+      <div class="chapter-head">
+        <span class="chapter-badge">STAGE 1</span><h1 class="chapter-title">信号と層</h1>
+        <div class="chapter-sub">0と1を線で送る</div>
+      </div>
+
+      <div class="mission-box">
+        <div class="mission-label">🎯 ミッション</div>
+        <div class="mission-text">0と1が信号で送られることと、ネットワークの仕事を層に分けて考える理由を説明できるようになろう。確認クイズに全問正解すれば合格。</div>
+        <span class="mission-status" id="mission-status">未達成</span>
+      </div>
+
+      <div class="dialogue-scene">
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">この旅で解きたい問題から話そう。きみがスマホで動画を見るとき、データは地球の裏側のサーバーから、いくつもの機械を経由して届いている。途中の機械は、きみのスマホのことも、動画のことも知らない。それでも、正しい相手に、正しい順番で、壊れずに届く。</div>
+        </div>
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbit.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble">手紙なら住所を書いて郵便局に任せますけど、コンピュータの世界では、住所や郵便局にあたるものは何なんですか？</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">それがこの旅の中身だ。</div>
+        </div>
+      </div>
+<div class="formula-box">
+  <span class="step"><strong>この旅で解きたい問題</strong></span>
+  <span class="step">分かっているもの：コンピュータの中のデータは0と1の並び（『論理回路CPUクエスト』）</span>
+  <span class="step">知りたいもの：その0と1を、世界中のどの機械へでも、正しく・安全に届けるしくみ</span>
+  <span class="step">道順：第1部 同じ建物の中で届ける（1〜5）→ 第2部 インターネットのサービス（6〜9）→ 第3部 安全に・大きくつなぐ（10〜15）</span>
+</div>
+      <div class="dialogue-scene">
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">まず一番下から。0と1は、線の上をどうやって進むと思う？</div>
+        </div>
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbit.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble">電気の「ある・ない」とか、強い・弱いで表すんだと思います。</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">そう。LAN ケーブルでは電圧の変化、光ファイバーでは光の点滅、Wi-Fi では電波の変化で0と1を表す。これを<strong>信号</strong>と呼ぶ。1秒間に送れるビットの数を<strong>通信速度</strong>と言い、1Gbps なら1秒に10億ビットだ。</div>
+        </div>
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbit.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble">Wi-Fi の電波は、近くの人がみんな同じ空間を使っていますよね。同時に送ったら、ぶつかりませんか？</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">ぶつかる。電波は1つの空間を共有しているので、Wi-Fi では「送る前に、ほかの人が送っていないか耳をすませて、空いていたら送る。ぶつかったら少し待って送り直す」という決まりがある。昔の有線のネットワークも、1本の線をみんなで共有していたので、同じように衝突が起きていた。それを解決したのが、次のステージのスイッチだ。</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">もう1つ、大事な考え方を最初に話しておく。「地球の裏まで正しく届ける」は大仕事なので、仕事を<strong>役割ごとに分けて</strong>、下から積み重ねる。これを<strong>層</strong>（レイヤー）と呼ぶ。</div>
+        </div>
+      </div>
+<div class="formula-box">
+  <span class="step">① 物理：0と1を信号にして線で送る（ケーブル・電波）</span>
+  <span class="step">② データリンク：同じ線・同じスイッチにつながった相手に届ける（MAC アドレス・スイッチ）</span>
+  <span class="step">③ ネットワーク：ネットワークをまたいで、遠くの相手に届ける（IP アドレス・ルーター）</span>
+  <span class="step">④ トランスポート：相手の機械の中の、どのアプリに届けるか。確実に届ける工夫（ポート番号・TCP・UDP）</span>
+  <span class="step">⑤ アプリケーション：届いたデータで何をするか（Web・メール・DNS）</span>
+</div>
+      <div class="dialogue-scene">
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbit.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble">分けると、何がいいんですか？</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">1つの層を取り替えても、ほかの層はそのまま使えることだ。Web ページを見るしくみ（⑤）は、線が有線でも Wi-Fi でも（①）変わらない。手紙で言えば、中身を書く人は、郵便局がトラックで運ぶか飛行機で運ぶかを気にしなくていい。それぞれの層は、すぐ下の層に「これを届けて」と頼み、すぐ上の層から頼まれた仕事をするだけでいい。この形は、STAGE15 で全体の地図としてもう一度まとめよう。</div>
+        </div>
+      </div>
+
+      <h2 class="quiz-head">確認クイズ</h2>
+      <div class="quiz-card" data-quiz>
+        <p class="quiz-q">Q1. LAN ケーブル・光ファイバー・Wi-Fi に共通することは？</p>
+        <div class="choice-list">
+          <button class="choice-btn">どれも0と1を、電気・光・電波などの信号の変化で表して送る</button>
+          <button class="choice-btn">どれも1本の線をみんなで共有している</button>
+          <button class="choice-btn">どれも同じ通信速度で送る</button>
+        </div>
+        <div class="quiz-explain" hidden>正解！ 表し方（電圧・光の点滅・電波）が違うだけで、0と1を信号で送ることは同じ。</div>
+      </div>
+      <div class="quiz-card" data-quiz>
+        <p class="quiz-q">Q2. Wi-Fi で複数の機械が同時に送ると何が起きる？</p>
+        <div class="choice-list">
+          <button class="choice-btn">速いほうが自動で優先される</button>
+          <button class="choice-btn">電波は混ざらないので何も起きない</button>
+          <button class="choice-btn">信号がぶつかって読めなくなるので、空いているか確かめてから送り、ぶつかったら待って送り直す</button>
+        </div>
+        <div class="quiz-explain" hidden>正解！ 電波は空間を共有する。衝突を避ける決まりを守って順番に使う。</div>
+      </div>
+      <div class="quiz-card" data-quiz>
+        <p class="quiz-q">Q3. ネットワークの仕事を層に分ける主な良さは？</p>
+        <div class="choice-list">
+          <button class="choice-btn">層が多いほど、通信が速くなる</button>
+          <button class="choice-btn">1つの層を取り替えても、ほかの層をそのまま使える</button>
+          <button class="choice-btn">層ごとに別の会社が作れば、値段が安くなる</button>
+        </div>
+        <div class="quiz-explain" hidden>正解！ 例えば Web のしくみは、下の線が有線でも Wi-Fi でも変わらない。役割を分けて、すぐ下に頼むだけにしている。</div>
+      </div>
+
+      <div class="stage-nav">
+        <a class="btn" href="./">← トップへ</a>
+        <button class="btn btn-primary" id="btn-next" disabled>次へ →</button>
+      </div>
+
+      <div id="book-recommend"></div>
+    </main>
+  </div>
+</div>
+
+<script>QUEST.initStagePage(1);</script>
+
+<script src="https://my.habatakijuku.com/sync.js" defer></script>
+</body>
+</html>

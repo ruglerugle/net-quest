@@ -1,0 +1,38 @@
+/* 実験ウィジェット共通 */
+.lab{background:var(--paper2);border:1.5px solid #9fcfc8;border-radius:12px;padding:12px 14px;margin:16px 0}
+.lab.solved{border-color:var(--ok-bd)}
+.lab-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px}
+.lab-badge{background:#1d6cc0;color:#fff;border-radius:6px;padding:2px 9px;font-size:11.5px;font-weight:950}
+.lab.solved .lab-badge{background:var(--ok)}
+.lab-title{font-size:15px;font-weight:950;color:#1c2f2b}
+.lab p{font-size:13.5px;margin:4px 0}
+.lab .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:center;margin:8px 0}
+.lab .readout{font-size:14px;font-weight:900;text-align:center;font-variant-numeric:tabular-nums}
+.lab svg{display:block;margin:0 auto;max-width:100%;height:auto}
+.lab-status{font-size:13px;font-weight:900;color:var(--muted);text-align:center}
+.lab-status.ok{color:var(--ok)}
+
+/* ===== ネットワーククエスト専用 ===== */
+.lab-note{font-size:12.5px;color:var(--muted);margin:10px 0 0}
+.dialog-bubble code,.formula-box code,.quiz-q code,.lab code{font-family:ui-monospace,Consolas,monospace;background:#e6eff9;border-radius:4px;padding:0 4px;font-size:.92em}
+.formula-box pre,pre.code{font-family:ui-monospace,Consolas,monospace;font-size:12px;white-space:pre;overflow-x:auto;margin:6px 0}
+pre.code{background:#0d1b25;color:#d6e8f8;border-radius:8px;padding:8px 10px;text-align:left}
+.lad-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.lad-wrap svg{max-width:none;display:block;margin:0 auto}
+.lad-table{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px;margin-top:8px}
+.cpu-box{border:1px solid #c6d6ea;border-radius:10px;background:#fff;padding:8px 10px}
+.cpu-box h4{font-size:12.5px;font-weight:950;color:#1d6cc0;margin-bottom:4px}
+.cpu-box table{width:100%;border-collapse:collapse;font-size:12.5px;font-variant-numeric:tabular-nums}
+.cpu-box td{border-bottom:1px dashed #dbe6f2;padding:2px 4px}
+.cpu-log{font-size:13px;font-weight:800;min-height:2.4em;margin-top:8px;background:#eef4fb;border-radius:8px;padding:6px 10px}
+.sw-wrap{display:grid;grid-template-columns:1fr 1.4fr;gap:10px;margin-top:8px}
+@media(max-width:620px){.sw-wrap{grid-template-columns:1fr}}
+.lab label{font-size:13px;font-weight:800}
+.lab select{font-family:var(--f);font-size:13px;padding:3px 4px;border-radius:6px;border:1px solid #9fb6d3}
+.sn-q{border:1px solid #c6d6ea;border-radius:8px;padding:8px 10px;margin-bottom:8px;background:#fff}
+.sn-q p{margin:0 0 4px}
+.sn-q .btn{padding:.4rem .8rem;font-size:13px}
+.sn-q .btn.ng{background:var(--ng-bg);border-color:var(--ng-bd);color:var(--ng)}
+.okc{color:var(--ok);font-weight:900;font-size:13px}
+.ngc{color:var(--ng);font-weight:900;font-size:13px}
+.lab .row .btn{font-size:13px}

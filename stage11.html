@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f2236">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-9RTQCP2HXM"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-9RTQCP2HXM');
+</script>
+<title>STAGE11 NAT ― ネットワーククエスト</title>
+<meta name="description" content="IPv4 の住所が足りない問題を、家の中ではプライベートアドレスを使い、外に出るときにルーターが1つのグローバルアドレスとポート番号に置き換える NAPT で乗り切ってきた。変換表の書き換えを1歩ずつ確かめ、外から直接つなげない理由も知る。">
+<link rel="canonical" href="https://informatics.habatakijuku.com/net-quest/stage11">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="ネットワーククエスト">
+<meta property="og:locale" content="ja_JP">
+<meta property="og:title" content="STAGE11 NAT ― ネットワーククエスト">
+<meta property="og:description" content="1つの住所をみんなで使う NAT。プライベートアドレスと変換表。">
+<meta property="og:url" content="https://informatics.habatakijuku.com/net-quest/stage11">
+<meta property="og:image" content="https://informatics.habatakijuku.com/images/ogp/net-quest.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌐</text></svg>">
+<link rel="stylesheet" href="design-system.css?v=20261108b">
+<link rel="stylesheet" href="lab.css?v=20261108b">
+<script src="js/stages.js?v=20261108b"></script>
+<script src="js/progress.js?v=20261108b"></script>
+<script src="js/labs.js?v=20261108b"></script>
+</head>
+<body>
+<div class="app-shell side-collapsed" id="app-shell">
+  <header class="game-header">
+    <div class="brand">
+      <div class="brand-title"><a class="head-reset home-badge" href="./" title="トップへ" aria-label="トップへ">🌐</a> <span>ネットワーククエスト</span></div>
+      <div class="brand-sub">STAGE 11 ― NAT ―</div>
+    </div>
+    <div class="head-progress-wrap">
+      <div class="head-progress-label" id="progress-label">クリア 0 / 15</div>
+      <div class="head-progress" role="progressbar" aria-label="クリア済みステージ数" aria-valuemin="0" aria-valuemax="15" aria-valuenow="0"><div class="head-progress-fill" id="progress-fill" style="width:0%"></div></div>
+    </div>
+    <div class="header-actions">
+      <a class="head-reset" href="/" title="情報の冒険（シリーズの地図）へ">🧭 地図</a>
+      <button class="head-reset" id="btn-reset-all">🔄 最初から</button>
+      <button class="head-reset" id="head-nav-toggle" title="ステージ一覧の表示切替">☰ ナビ</button>
+    </div>
+  </header>
+
+  <div class="game-layout">
+    <div class="side-backdrop" id="side-backdrop"></div>
+    <aside class="side-panel">
+      <div class="side-head">
+        <button class="side-toggle" id="sidebar-toggle" title="ステージ一覧の表示切替" aria-label="ステージ一覧の表示切替">☰</button>
+        <span class="side-head-text">📚 ステージ一覧</span>
+      </div>
+      <div class="side-list" id="side-list"></div>
+    </aside>
+
+    <main class="main-area">
+      <div class="chapter-head">
+        <span class="chapter-badge">STAGE 11</span><h1 class="chapter-title">NAT</h1>
+        <div class="chapter-sub">1つの住所をみんなで使う</div>
+      </div>
+
+      <div class="mission-box">
+        <div class="mission-label">🎯 ミッション</div>
+        <div class="mission-text">プライベートアドレスと NAT（NAPT）のしくみ、外から家の中へ直接つなげない理由を説明できるようになろう。変換のやり取りを最後まで追い、確認クイズに全問正解すれば合格。</div>
+        <span class="mission-status" id="mission-status">未達成</span>
+      </div>
+
+      <div class="dialogue-scene">
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">STAGE3 の最後に、IPv4 の住所は約43億個しかなく、とっくに足りないと話したね。家にスマホ・パソコン・ゲーム機が5台あったら、5つの住所が要る。どうしているか。</div>
+        </div>
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbit.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble">家の中だけで使う住所と、外で使う住所を分ける、とか……？</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">そう考えて決められたのが<strong>プライベートアドレス</strong>だ。<code>192.168.x.x</code>、<code>10.x.x.x</code>、<code>172.16〜31.x.x</code> は「家や会社の中だけで使う住所」と決められていて、どの家でも同じ番号を使ってよい。インターネットで使う世界に1つの住所は<strong>グローバルアドレス</strong>と呼ぶ。</div>
+        </div>
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbit.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble">でも、プライベートアドレスのまま外に出たら、返事はどこに戻ればいいか分かりませんよね。192.168.1.10 は世界中に何百万台もあるのに。</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">だから、家のルーターが、外に出るパケットの送り元を、自分のグローバルアドレスに<strong>書き換える</strong>。これを <strong>NAT</strong>（Network Address Translation、住所の変換）と呼ぶ。家の5台が同時に通信しても区別できるように、送り元のポート番号も書き換えて、変換表に覚えておく。ポートまで使う NAT を <strong>NAPT</strong> と呼び、家のルーターがしているのはこちらだ。</div>
+        </div>
+      </div>
+<div class="lab" id="lad-s11"></div>
+<script>
+Ladder.mount(document.getElementById("lad-s11"), {
+  id: "net-s11-nat", title: "家のルーターの変換表（NAPT）",
+  actors: ["PC 192.168.1.10", "スマホ 192.168.1.20", "家のルーター 203.0.113.7", "Webサーバー"],
+  steps: [
+    { from: 0, to: 2, label: "送り元 .10:50123", detail: "PC が Web サーバーへ。送り元はプライベートアドレス。", table: { "ルーターの変換表": [["（空）", "", ""]] } },
+    { from: 2, to: 3, label: "送り元 203.0.113.7:40001", detail: "ルーターが送り元を自分のグローバルアドレスと空いているポート 40001 に書き換え、表に覚えた。", table: { "ルーターの変換表": [["家の中", "→", "外"], ["192.168.1.10:50123", "↔", "203.0.113.7:40001"]] } },
+    { from: 1, to: 2, label: "送り元 .20:50123", detail: "スマホも同じポート番号 50123 を使っていた（たまたま）。" },
+    { from: 2, to: 3, label: "送り元 203.0.113.7:40002", detail: "外では別のポート 40002 にして区別する。", table: { "ルーターの変換表": [["家の中", "→", "外"], ["192.168.1.10:50123", "↔", "203.0.113.7:40001"], ["192.168.1.20:50123", "↔", "203.0.113.7:40002"]] } },
+    { from: 3, to: 2, label: "あて先 203.0.113.7:40002", detail: "サーバーの返事は、ルーターのグローバルアドレスの 40002 番へ。" },
+    { from: 2, to: 1, label: "あて先 192.168.1.20:50123", detail: "表を引いて、40002 はスマホの 50123 と分かった。あて先を書き戻して家の中へ。" }
+  ]
+});
+</script>
+      <div class="dialogue-scene">
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbit.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble">1つのグローバルアドレスを、ポート番号で分けて何台もで使い回しているんですね。</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">そう。NAT のおかげで、IPv4 は寿命を何十年も延ばしてきた。でも、困ることもある。外のだれかが、家の中のゲーム機に<strong>外から</strong>つなごうとしたら？</div>
+        </div>
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbitThink.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble"> 変換表には、中から外へ出たときの組しか書いていない。外から突然来たパケットは、どの機械あてか表に無いので……届けられない。</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">その通り。だから、家の中の機械どうしを外からつなぐゲームやビデオ通話では、いったん外のサーバーを経由したり、特別な工夫が要ったりする。「外から勝手につなげない」ことは、守りとしては役に立つけれど、本来インターネットは「どの機械とどの機械も直接つながれる」ことを目指していた。それを取り戻すのが、次の IPv6 だ。</div>
+        </div>
+      </div>
+
+      <h2 class="quiz-head">確認クイズ</h2>
+      <div class="quiz-card" data-quiz>
+        <p class="quiz-q">Q1. プライベートアドレスについて正しいのは？</p>
+        <div class="choice-list">
+          <button class="choice-btn">世界に1つしか無い住所で、インターネットで直接使う</button>
+          <button class="choice-btn">携帯電話だけが使う住所</button>
+          <button class="choice-btn">家や会社の中だけで使う住所で、ほかの家でも同じ番号を使ってよい</button>
+        </div>
+        <div class="quiz-explain" hidden>正解！ 192.168.x.x などは中だけで使う。外に出るときはルーターがグローバルアドレスに変換する。</div>
+      </div>
+      <div class="quiz-card" data-quiz>
+        <p class="quiz-q">Q2. NAPT で、同じグローバルアドレスを複数の機械で使い分けられる理由は？</p>
+        <div class="choice-list">
+          <button class="choice-btn">機械ごとに違う MAC アドレスを使うから</button>
+          <button class="choice-btn">送り元のポート番号も書き換えて、変換表でどの機械の通信かを区別するから</button>
+          <button class="choice-btn">機械が順番にしか通信しないから</button>
+        </div>
+        <div class="quiz-explain" hidden>正解！ 外から見るとアドレスは同じでも、ポート番号が違う。返事はポート番号で家の中の機械に振り分けられる。</div>
+      </div>
+      <div class="quiz-card" data-quiz>
+        <p class="quiz-q">Q3. 家の中のゲーム機に、外から突然つなげない理由は？</p>
+        <div class="choice-list">
+          <button class="choice-btn">変換表には中から外へ出た通信の組しか無く、外から来たパケットをどの機械に渡すか分からないから</button>
+          <button class="choice-btn">ゲーム機は IP アドレスを持たないから</button>
+          <button class="choice-btn">外からのパケットは必ず暗号になっているから</button>
+        </div>
+        <div class="quiz-explain" hidden>正解！ 中から出た通信の返事なら表で戻せるが、最初から外から来たものは行き先が分からない。</div>
+      </div>
+
+      <div class="stage-nav">
+        <a class="btn" href="stage10.html">← 前のステージ</a>
+        <button class="btn btn-primary" id="btn-next" disabled>次へ →</button>
+      </div>
+
+      <div id="book-recommend"></div>
+    </main>
+  </div>
+</div>
+
+<script>QUEST.initStagePage(11);</script>
+
+<script src="https://my.habatakijuku.com/sync.js" defer></script>
+</body>
+</html>

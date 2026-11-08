@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f2236">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-9RTQCP2HXM"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-9RTQCP2HXM');
+</script>
+<title>STAGE3 IPアドレスとサブネット ― ネットワーククエスト</title>
+<meta name="description" content="遠くの相手にも届けるための住所、IP アドレス。32ビットの数を4つに区切る書き方、ネットワーク部とホスト部、サブネットマスクと /24 の意味を、2進数の AND で「同じネットワークか」を判定しながら確かめる。">
+<link rel="canonical" href="https://informatics.habatakijuku.com/net-quest/stage3">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="ネットワーククエスト">
+<meta property="og:locale" content="ja_JP">
+<meta property="og:title" content="STAGE3 IPアドレスとサブネット ― ネットワーククエスト">
+<meta property="og:description" content="IP アドレスとサブネットマスク。2進数の AND で同じネットワークかを判定する。">
+<meta property="og:url" content="https://informatics.habatakijuku.com/net-quest/stage3">
+<meta property="og:image" content="https://informatics.habatakijuku.com/images/ogp/net-quest.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌐</text></svg>">
+<link rel="stylesheet" href="design-system.css?v=20261108b">
+<link rel="stylesheet" href="lab.css?v=20261108b">
+<script src="js/stages.js?v=20261108b"></script>
+<script src="js/progress.js?v=20261108b"></script>
+<script src="js/labs.js?v=20261108b"></script>
+</head>
+<body>
+<div class="app-shell side-collapsed" id="app-shell">
+  <header class="game-header">
+    <div class="brand">
+      <div class="brand-title"><a class="head-reset home-badge" href="./" title="トップへ" aria-label="トップへ">🌐</a> <span>ネットワーククエスト</span></div>
+      <div class="brand-sub">STAGE 3 ― IPアドレスとサブネット ―</div>
+    </div>
+    <div class="head-progress-wrap">
+      <div class="head-progress-label" id="progress-label">クリア 0 / 15</div>
+      <div class="head-progress" role="progressbar" aria-label="クリア済みステージ数" aria-valuemin="0" aria-valuemax="15" aria-valuenow="0"><div class="head-progress-fill" id="progress-fill" style="width:0%"></div></div>
+    </div>
+    <div class="header-actions">
+      <a class="head-reset" href="/" title="情報の冒険（シリーズの地図）へ">🧭 地図</a>
+      <button class="head-reset" id="btn-reset-all">🔄 最初から</button>
+      <button class="head-reset" id="head-nav-toggle" title="ステージ一覧の表示切替">☰ ナビ</button>
+    </div>
+  </header>
+
+  <div class="game-layout">
+    <div class="side-backdrop" id="side-backdrop"></div>
+    <aside class="side-panel">
+      <div class="side-head">
+        <button class="side-toggle" id="sidebar-toggle" title="ステージ一覧の表示切替" aria-label="ステージ一覧の表示切替">☰</button>
+        <span class="side-head-text">📚 ステージ一覧</span>
+      </div>
+      <div class="side-list" id="side-list"></div>
+    </aside>
+
+    <main class="main-area">
+      <div class="chapter-head">
+        <span class="chapter-badge">STAGE 3</span><h1 class="chapter-title">IPアドレスとサブネット</h1>
+        <div class="chapter-sub">同じネットワークかを判定する</div>
+      </div>
+
+      <div class="mission-box">
+        <div class="mission-label">🎯 ミッション</div>
+        <div class="mission-text">IP アドレスの書き方と、サブネットマスクで同じネットワークかを判定する方法を説明できるようになろう。3組のアドレスを判定し、確認クイズに全問正解すれば合格。</div>
+        <span class="mission-status" id="mission-status">未達成</span>
+      </div>
+
+      <div class="dialogue-scene">
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">MAC アドレスは部品に付いた番号で、並び方に規則が無い。世界中の何十億台もの MAC アドレスを全部覚えている機械は無いから、遠くの相手に届けるには、<strong>場所を表す住所</strong>が別に必要だ。それが <strong>IP アドレス</strong>だ。</div>
+        </div>
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbit.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble">住所なら、「何県・何市・何番地」のように、大きな区切りから順に書いてあるんですか？</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">考え方は同じだ。いま広く使われている IPv4 の IP アドレスは32ビットの数で、8ビットずつ4つに区切って10進数で書く。<code>192.168.1.10</code> のようにね。前半が「どのネットワークか」を表す<strong>ネットワーク部</strong>、後半が「そのネットワークの中のどの機械か」を表す<strong>ホスト部</strong>だ。</div>
+        </div>
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbit.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble">どこまでがネットワーク部かは、どうやって決めるんですか？</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble"><strong>サブネットマスク</strong>で示す。ネットワーク部を1、ホスト部を0にした32ビットの数だ。前から24ビットがネットワーク部なら、<code>255.255.255.0</code>（1が24個、0が8個）。これを短く <code>/24</code> とも書く。</div>
+        </div>
+      </div>
+<div class="formula-box">
+  <span class="step">192.168.1.10 ＝ 11000000.10101000.00000001.00001010</span>
+  <span class="step">/24（255.255.255.0）＝ 11111111.11111111.11111111.00000000</span>
+  <span class="step">AND（両方1のときだけ1）＝ 11000000.10101000.00000001.00000000 ＝ 192.168.1.0 ← ネットワークの番号</span>
+</div>
+      <div class="dialogue-scene">
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbitThink.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble"> AND を取ると、マスクが0のホスト部は全部0になって、ネットワーク部だけが残る。2つのアドレスで AND の結果が同じなら、同じネットワークにいる、ということですか？</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">その通り。<strong>同じネットワーク</strong>なら、スイッチを通して直接届けられる。<strong>違うネットワーク</strong>なら、ルーター（STAGE5）に頼む。送る機械は、送るたびにこの判定をしているんだ。『論理回路CPUクエスト』の AND ゲートが、ここでも働いている。</div>
+        </div>
+      </div>
+<div class="lab" data-lab="subnet" data-id="net-s3-subnet"></div>
+      <div class="dialogue-scene">
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbit.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble">/24 なら、ホスト部は8ビットだから、256台までですか？</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">ほぼそうだけれど、2つ使えない番号がある。ホスト部が全部0の番号は「ネットワークそのもの」、全部1の番号は「そのネットワークの全員あて（ブロードキャスト）」を表す決まりなので、機械に付けられるのは 256 − 2 ＝ 254 台だ。</div>
+        </div>
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbit.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble">32ビットだと、全部で約43億個。世界の人口より少ないですね。スマホもパソコンも1人何台も持っているのに……。</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">いいところに気づいたね。IPv4 の住所は、とっくに足りなくなっている。それをどう乗り切ってきたかは STAGE11 の NAT で、本当の答えは STAGE12 の IPv6 で見よう。</div>
+        </div>
+      </div>
+
+      <h2 class="quiz-head">確認クイズ</h2>
+      <div class="quiz-card" data-quiz>
+        <p class="quiz-q">Q1. <code>10.1.2.3</code> を /16（255.255.0.0）で AND すると、ネットワークの番号は？</p>
+        <div class="choice-list">
+          <button class="choice-btn">10.1.2.0</button>
+          <button class="choice-btn">10.1.0.0</button>
+          <button class="choice-btn">0.0.2.3</button>
+        </div>
+        <div class="quiz-explain" hidden>正解！ /16 は前の16ビット（前の2つの区切り）がネットワーク部。後ろ2つが0になって 10.1.0.0。</div>
+      </div>
+      <div class="quiz-card" data-quiz>
+        <p class="quiz-q">Q2. 送る機械が「同じネットワークか」を判定する方法は？</p>
+        <div class="choice-list">
+          <button class="choice-btn">自分と相手の IP アドレスをそれぞれサブネットマスクと AND し、結果が同じか比べる</button>
+          <button class="choice-btn">相手の MAC アドレスの前半が自分と同じか比べる</button>
+          <button class="choice-btn">IP アドレスの最後の数が近いか比べる</button>
+        </div>
+        <div class="quiz-explain" hidden>正解！ マスクの1の部分（ネットワーク部）だけを取り出して比べる。同じなら直接、違えばルーターへ。</div>
+      </div>
+      <div class="quiz-card" data-quiz>
+        <p class="quiz-q">Q3. /24 のネットワークで、機械に付けられる IP アドレスはいくつ？</p>
+        <div class="choice-list">
+          <button class="choice-btn">256</button>
+          <button class="choice-btn">24</button>
+          <button class="choice-btn">254</button>
+        </div>
+        <div class="quiz-explain" hidden>正解！ ホスト部8ビットで256通り。全部0（ネットワークそのもの）と全部1（ブロードキャスト）を除いて254。</div>
+      </div>
+
+      <div class="stage-nav">
+        <a class="btn" href="stage2.html">← 前のステージ</a>
+        <button class="btn btn-primary" id="btn-next" disabled>次へ →</button>
+      </div>
+
+      <div id="book-recommend"></div>
+    </main>
+  </div>
+</div>
+
+<script>QUEST.initStagePage(3);</script>
+
+<script src="https://my.habatakijuku.com/sync.js" defer></script>
+</body>
+</html>

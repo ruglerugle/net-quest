@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f2236">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-9RTQCP2HXM"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-9RTQCP2HXM');
+</script>
+<title>STAGE4 ARP ― ネットワーククエスト</title>
+<meta name="description" content="IP アドレスは分かっても、実際にフレームを送るにはあて先の MAC アドレスが要る。全員に「この IP アドレスの人は？」と尋ね、本人だけが答える ARP のやり取りと、答えを覚えておく ARP 表を、1歩ずつ確かめる。">
+<link rel="canonical" href="https://informatics.habatakijuku.com/net-quest/stage4">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="ネットワーククエスト">
+<meta property="og:locale" content="ja_JP">
+<meta property="og:title" content="STAGE4 ARP ― ネットワーククエスト">
+<meta property="og:description" content="IP アドレスから MAC アドレスを知る ARP。全員に尋ね、本人だけが答える。">
+<meta property="og:url" content="https://informatics.habatakijuku.com/net-quest/stage4">
+<meta property="og:image" content="https://informatics.habatakijuku.com/images/ogp/net-quest.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌐</text></svg>">
+<link rel="stylesheet" href="design-system.css?v=20261108b">
+<link rel="stylesheet" href="lab.css?v=20261108b">
+<script src="js/stages.js?v=20261108b"></script>
+<script src="js/progress.js?v=20261108b"></script>
+<script src="js/labs.js?v=20261108b"></script>
+</head>
+<body>
+<div class="app-shell side-collapsed" id="app-shell">
+  <header class="game-header">
+    <div class="brand">
+      <div class="brand-title"><a class="head-reset home-badge" href="./" title="トップへ" aria-label="トップへ">🌐</a> <span>ネットワーククエスト</span></div>
+      <div class="brand-sub">STAGE 4 ― ARP ―</div>
+    </div>
+    <div class="head-progress-wrap">
+      <div class="head-progress-label" id="progress-label">クリア 0 / 15</div>
+      <div class="head-progress" role="progressbar" aria-label="クリア済みステージ数" aria-valuemin="0" aria-valuemax="15" aria-valuenow="0"><div class="head-progress-fill" id="progress-fill" style="width:0%"></div></div>
+    </div>
+    <div class="header-actions">
+      <a class="head-reset" href="/" title="情報の冒険（シリーズの地図）へ">🧭 地図</a>
+      <button class="head-reset" id="btn-reset-all">🔄 最初から</button>
+      <button class="head-reset" id="head-nav-toggle" title="ステージ一覧の表示切替">☰ ナビ</button>
+    </div>
+  </header>
+
+  <div class="game-layout">
+    <div class="side-backdrop" id="side-backdrop"></div>
+    <aside class="side-panel">
+      <div class="side-head">
+        <button class="side-toggle" id="sidebar-toggle" title="ステージ一覧の表示切替" aria-label="ステージ一覧の表示切替">☰</button>
+        <span class="side-head-text">📚 ステージ一覧</span>
+      </div>
+      <div class="side-list" id="side-list"></div>
+    </aside>
+
+    <main class="main-area">
+      <div class="chapter-head">
+        <span class="chapter-badge">STAGE 4</span><h1 class="chapter-title">ARP</h1>
+        <div class="chapter-sub">IPアドレスからMACアドレスを知る</div>
+      </div>
+
+      <div class="mission-box">
+        <div class="mission-label">🎯 ミッション</div>
+        <div class="mission-text">ARP が何のためにあり、どんなやり取りで MAC アドレスを知るかを説明できるようになろう。ARP のやり取りを最後まで追い、確認クイズに全問正解すれば合格。</div>
+        <span class="mission-status" id="mission-status">未達成</span>
+      </div>
+
+      <div class="dialogue-scene">
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">PC-A（192.168.1.10）から、同じネットワークの PC-B（192.168.1.20）に送りたい。前のステージの判定で、同じネットワークだと分かった。では、フレームを作ろう。あて先の MAC アドレスには何を書く？</div>
+        </div>
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbit.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble">あ……PC-B の IP アドレスは知っていても、MAC アドレスを知りません。スイッチは MAC アドレスを見て届けるので、フレームが作れない。</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">そこで使うのが <strong>ARP</strong>（Address Resolution Protocol、アドレス解決の決まり）だ。手順はこうなる。</div>
+        </div>
+      </div>
+<div class="formula-box">
+  <span class="step">① PC-A：あて先を全員（ff:ff:ff:ff:ff:ff）にして「192.168.1.20 の人、MAC アドレスを教えて」と尋ねる（ARP 要求、ブロードキャスト）</span>
+  <span class="step">② 全員が受け取るが、192.168.1.20 でない機械は無視する</span>
+  <span class="step">③ PC-B だけが「それは私。MAC は bb:02」と、PC-A にだけ答える（ARP 応答）</span>
+  <span class="step">④ PC-A は答えを <strong>ARP 表</strong>に書いておく。次からは尋ねなくてよい</span>
+</div>
+<div class="lab" id="lad-s4"></div>
+<script>
+Ladder.mount(document.getElementById("lad-s4"), {
+  id: "net-s4-arp", title: "ARP で MAC アドレスを知る",
+  actors: ["PC-A .10", "スイッチ", "PC-B .20", "PC-C .30"],
+  start: "PC-A は PC-B の IP アドレス 192.168.1.20 だけを知っている。",
+  steps: [
+    { from: 0, to: 1, label: "ARP要求（あて先 ff:ff…）", detail: "「192.168.1.20 の人は MAC を教えて」。あて先は全員（ブロードキャスト）。", table: { "PC-A の ARP 表": [["（空）", ""]] } },
+    { from: 1, to: [2, 3], label: "全員に配る", detail: "ブロードキャストなので、スイッチは全部のポートに配る。" },
+    { from: 3, to: 3, label: "", detail: "PC-C は 192.168.1.20 ではないので、何もしない。" },
+    { from: 2, to: 1, label: "ARP応答「MAC は bb:02」", detail: "PC-B だけが、PC-A にあてて答える（相手が分かっているので全員には送らない）。" },
+    { from: 1, to: 0, label: "PC-A へ", detail: "スイッチは、さっきの要求で PC-A のポートを覚えているので、PC-A にだけ届ける。" },
+    { from: 0, to: 0, label: "", detail: "PC-A は ARP 表に「192.168.1.20 → bb:02」と書いた。これで PC-B あてのフレームが作れる。", table: { "PC-A の ARP 表": [["192.168.1.20", "bb:02"]] } }
+  ]
+});
+</script>
+      <div class="dialogue-scene">
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbit.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble">尋ねるのはブロードキャスト、答えるのは本人あて。スイッチの学習と同じく、最初の1回だけ全員に配るんですね。</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">そう。ARP 表の中身は、しばらく（数分程度）たつと消える。機械が入れ替わって、同じ IP アドレスが別の MAC アドレスになることがあるからだ。</div>
+        </div>
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbit.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble">全員が答えを信じるなら、うそをつく機械がいたらどうなるんですか？ 「それは私」と、本人より先に答えたら。</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">大事なところに気づいたね。ARP には、答えが本物かを確かめる仕組みが無い。そのため、うその ARP 応答で通信を自分のところへ横取りする攻撃（ARP スプーフィング）が知られている。ARP は「同じネットワークの中の機械は信用できる」という前提で作られた決まりなんだ。だから、知らない機械が勝手につながらないように守ることや、通信の中身そのものを暗号で守ること（STAGE10）が大事になる。</div>
+        </div>
+      </div>
+
+      <h2 class="quiz-head">確認クイズ</h2>
+      <div class="quiz-card" data-quiz>
+        <p class="quiz-q">Q1. ARP を使う目的は？</p>
+        <div class="choice-list">
+          <button class="choice-btn">同じネットワークの相手の IP アドレスから、その MAC アドレスを知るため</button>
+          <button class="choice-btn">相手の名前から IP アドレスを知るため</button>
+          <button class="choice-btn">自分の IP アドレスを決めるため</button>
+        </div>
+        <div class="quiz-explain" hidden>正解！ フレームを作るにはあて先の MAC アドレスが要る。名前から IP アドレスを知るのは DNS（STAGE7）、自分の IP アドレスをもらうのは DHCP（STAGE6）。</div>
+      </div>
+      <div class="quiz-card" data-quiz>
+        <p class="quiz-q">Q2. ARP 要求と ARP 応答の送り方の組み合わせは？</p>
+        <div class="choice-list">
+          <button class="choice-btn">要求も応答もブロードキャスト</button>
+          <button class="choice-btn">要求は相手あて、応答はブロードキャスト</button>
+          <button class="choice-btn">要求はブロードキャスト、応答は尋ねた本人あて</button>
+        </div>
+        <div class="quiz-explain" hidden>正解！ 相手の MAC が分からないので全員に尋ね、答えるほうは尋ねた相手が分かっているので本人にだけ返す。</div>
+      </div>
+      <div class="quiz-card" data-quiz>
+        <p class="quiz-q">Q3. ARP 表の中身が、しばらくすると消える理由は？</p>
+        <div class="choice-list">
+          <button class="choice-btn">表がいっぱいになるから</button>
+          <button class="choice-btn">機械が入れ替わって、同じ IP アドレスでも MAC アドレスが変わることがあるから</button>
+          <button class="choice-btn">ARP 表は電源を切らないと使えないから</button>
+        </div>
+        <div class="quiz-explain" hidden>正解！ 古い対応を使い続けると、届かなくなる。一定時間で消して、また尋ねる。</div>
+      </div>
+
+      <div class="stage-nav">
+        <a class="btn" href="stage3.html">← 前のステージ</a>
+        <button class="btn btn-primary" id="btn-next" disabled>次へ →</button>
+      </div>
+
+      <div id="book-recommend"></div>
+    </main>
+  </div>
+</div>
+
+<script>QUEST.initStagePage(4);</script>
+
+<script src="https://my.habatakijuku.com/sync.js" defer></script>
+</body>
+</html>

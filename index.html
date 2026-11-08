@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f2236">
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-9RTQCP2HXM"></script>
 <script>
@@ -11,110 +12,201 @@
   gtag('js', new Date());
   gtag('config', 'G-9RTQCP2HXM');
 </script>
-<title>ネットワーククエスト ― ゲームで学ぶネットワークの仕組み（届け！そのパケット）</title>
-<meta name="description" content="ケーブル配線からスイッチ・IPアドレス・ARP・ルーター・DHCP・DNSまで、パケットの旅を目で追いながらネットワークの仕組みを学べる無料学習ゲーム。ねこ先生とうさ美が案内します。">
+<title>ネットワーククエスト ― 地球の裏まで届くしくみ 全15ステージの無料学習ゲーム</title>
+<meta name="description" content="0と1を信号で送るところから、スイッチと MAC アドレス、IP アドレスとサブネット、ARP、ルーター、DHCP、DNS、TCP と UDP、HTTP、暗号と TLS、NAT、IPv6、VLAN、ファイアウォール、障害の切り分けまで、やり取りを1歩ずつ追いながら学ぶ全15ステージの無料学習サイト。ねこ博士とうさ美が案内します。">
 <link rel="canonical" href="https://informatics.habatakijuku.com/net-quest/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="ネットワーククエスト">
 <meta property="og:locale" content="ja_JP">
-<meta property="og:title" content="ネットワーククエスト ― ゲームで学ぶネットワークの仕組み（届け！そのパケット）">
-<meta property="og:description" content="パケットの旅を目で追いながら、ネットワークの仕組みを体験して学べる無料学習ゲーム。">
+<meta property="og:title" content="ネットワーククエスト ― 地球の裏まで届くしくみ 全15ステージの無料学習ゲーム">
+<meta property="og:description" content="動画はどうやって地球の裏から届くのか。スイッチ・IP・DNS・TCP・HTTP・TLS・IPv6 まで、やり取りを1歩ずつ追う全15ステージ。">
 <meta property="og:url" content="https://informatics.habatakijuku.com/net-quest/">
 <meta property="og:image" content="https://informatics.habatakijuku.com/images/ogp/net-quest.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌐</text></svg>">
+<link rel="stylesheet" href="design-system.css?v=20261108b">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "LearningResource",
-  "name": "ネットワーククエスト ― 届け！そのパケット ―",
+  "name": "ネットワーククエスト",
   "alternateName": "NET QUEST",
-  "description": "ケーブル配線からスイッチ・IPアドレス・ARP・ルーター・DHCP・DNSまで、パケットの旅を目で追いながらネットワークの仕組みを学べる無料学習ゲーム。",
+  "description": "0と1を信号で送るところから、スイッチと MAC アドレス、IP アドレスとサブネット、ARP、ルーター、DHCP、DNS、TCP と UDP、HTTP、暗号と TLS、NAT、IPv6、VLAN、ファイアウォール、障害の切り分けまで、やり取りを1歩ずつ追いながら学ぶ全15ステージの無料学習サイト。ねこ博士とうさ美が案内します。",
   "url": "https://informatics.habatakijuku.com/net-quest/",
   "inLanguage": "ja",
   "learningResourceType": "learning activity",
-  "teaches": "ネットワークの仕組み（OSI参照モデル・MACアドレス・IPアドレス・ARP・ルーティング・DHCP・DNS）",
+  "educationalLevel": "中学生以上",
+  "teaches": "コンピュータネットワーク（層・MACアドレス・スイッチ・IPアドレス・サブネットマスク・ARP・ルーター・DHCP・DNS・ポート番号・TCP・UDP・HTTP/2・HTTP/3・暗号・鍵交換・証明書・TLS・NAT・IPv6・VLAN・ファイアウォール・障害の切り分け）",
   "isAccessibleForFree": true,
-  "author": { "@type": "Person", "name": "ruglerugle" }
+  "author": {
+    "@type": "Person",
+    "name": "ruglerugle"
+  }
 }
 </script>
-<link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-<div class="app-shell side-collapsed" id="app-shell">
-  <header class="game-header">
-    <div class="brand">
-      <h1 class="brand-title">ネットワーククエスト</h1>
-      <div class="brand-sub">― 届け！そのパケット ―</div>
-    </div>
-    <div class="head-progress-wrap">
-      <div class="head-progress-label" id="progress-label">クリア 0 / 6</div>
-      <div class="head-progress"><div class="head-progress-fill" id="progress-fill"></div></div>
-    </div>
-    <div class="header-actions">
-      <a class="head-btn home-badge" href="/" title="クエスト集トップへ" aria-label="クエスト集トップへ">🧭</a>
-      <button id="head-nav-toggle" class="head-btn" title="ステージ一覧の表示切替">☰ ナビ</button>
+<div class="shell">
+  <nav class="topbar" aria-label="サイト情報">
+    <span class="brand-badge" aria-hidden="true">🌐</span>
+    <span class="brand-copy">
+      <strong>ネットワーククエスト</strong>
+      <small>NETWORK QUEST</small>
+    </span>
+    <a class="head-reset" style="margin-left:auto" href="/" title="情報の冒険（シリーズの地図）へ">🧭 シリーズの地図</a>
+  </nav>
+
+  <header class="hero">
+    <div class="hero-copy">
+      <h1><span class="line">地球の裏のサーバーから、</span><span class="line accent">どうやって届く？</span></h1>
+      <p>きみが見ている動画は、何台もの機械を経由して、地球の裏から届いている。途中の機械は、きみのことも動画のことも知らないのに、正しい相手に、正しい順番で、盗み見されずに届く。<span class="nowrap">同じ建物の中で届ける、ネットワークをまたぐ、名前で探す、確実に届ける、</span>暗号で守る――。ネットワークの仕事を層ごとに分けて、1つ1つのやり取りを自分の手で1歩ずつ進めて確かめよう。</p>
     </div>
   </header>
 
-  <div class="game-layout">
-    <div class="side-backdrop" id="side-backdrop"></div>
-    <aside class="side-panel" id="stage-sidebar">
-      <div class="side-head">
-        <button class="side-toggle" id="sidebar-toggle" title="ステージ一覧の表示切替" aria-label="ステージ一覧の表示切替">☰</button>
-        <span class="side-head-text">ステージ一覧</span>
-      </div>
-      <nav id="stage-nav" class="step-list"></nav>
-    </aside>
-
-    <main class="main-area" id="main-area">
-      <div id="dialogue-panel"></div>
-
-      <div id="mission-banner">
-        <div id="mission-title"></div>
-        <div id="mission-text"></div>
-        <div id="mission-status"></div>
+  <main>
+    <section class="board" aria-labelledby="quest-heading">
+      <div class="board-head">
+        <div><h2 id="quest-heading">クエストを選ぼう！</h2></div>
+        <p>ステージ1から順番にクリアしよう（前のステージをクリアすると次が解放されます）</p>
       </div>
 
-      <section id="stage-area">
-        <div id="svg-wrap">
-          <svg id="network-svg" viewBox="0 0 900 480" preserveAspectRatio="xMidYMid meet"></svg>
-          <div id="live-status"></div>
-        </div>
-        <div id="stage-actions"></div>
-      </section>
+      <div class="quest-grid">
+        <a class="quest-card" href="stage1.html" data-stage="1" style="--accent:#1d6cc0;--accent-bg:#e8f1fb">
+          <div class="q-top"><span class="q-num">1</span><span class="q-suit" aria-hidden="true">〰️</span></div>
+          <div class="q-meta"><span class="q-tag">層</span><span class="q-time">⏱ 約10分</span></div>
+          <div class="q-title">信号と層</div>
+          <p class="q-desc">0と1を電気・光・電波で送る。ぶつかる問題と、届ける仕事を層に分けて考える理由。</p>
+          <span class="q-cta">はじめる →</span>
+        </a>
 
-      <div id="packet-detail-box">
-        <h3>パケット詳細</h3>
-        <div id="packet-detail"><p class="hint">一時停止してパケットをクリックすると中身が見られます</p></div>
+        <a class="quest-card" href="stage2.html" data-stage="2" style="--accent:#2f7a3b;--accent-bg:#eaf6ec">
+          <div class="q-top"><span class="q-num">2</span><span class="q-suit" aria-hidden="true">🔀</span></div>
+          <div class="q-meta"><span class="q-tag">スイッチ</span><span class="q-time">⏱ 約12分</span></div>
+          <div class="q-title">スイッチとMACアドレス</div>
+          <p class="q-desc">部品ごとの番号 MAC アドレスと、送り元を見て覚えるスイッチ。分からない相手には全員に配る。</p>
+          <span class="q-cta">はじめる →</span>
+        </a>
+
+        <a class="quest-card" href="stage3.html" data-stage="3" style="--accent:#7a6a2f;--accent-bg:#f7f3e2">
+          <div class="q-top"><span class="q-num">3</span><span class="q-suit" aria-hidden="true">🏠</span></div>
+          <div class="q-meta"><span class="q-tag">IP</span><span class="q-time">⏱ 約13分</span></div>
+          <div class="q-title">IPアドレスとサブネット</div>
+          <p class="q-desc">遠くへ届けるための住所。32ビットを4つに区切る書き方と、サブネットマスクとの AND で同じネットワークかを判定する。</p>
+          <span class="q-cta">はじめる →</span>
+        </a>
+
+        <a class="quest-card" href="stage4.html" data-stage="4" style="--accent:#b5504a;--accent-bg:#fdefed">
+          <div class="q-top"><span class="q-num">4</span><span class="q-suit" aria-hidden="true">📢</span></div>
+          <div class="q-meta"><span class="q-tag">ARP</span><span class="q-time">⏱ 約11分</span></div>
+          <div class="q-title">ARP</div>
+          <p class="q-desc">IP アドレスは分かっても MAC アドレスが要る。全員に尋ねて本人だけが答える ARP。</p>
+          <span class="q-cta">はじめる →</span>
+        </a>
+
+        <a class="quest-card" href="stage5.html" data-stage="5" style="--accent:#5b3f9a;--accent-bg:#f1ecfa">
+          <div class="q-top"><span class="q-num">5</span><span class="q-suit" aria-hidden="true">🚦</span></div>
+          <div class="q-meta"><span class="q-tag">ルーター</span><span class="q-time">⏱ 約13分</span></div>
+          <div class="q-title">ルーター</div>
+          <p class="q-desc">違うネットワークにはデフォルトゲートウェイへ。中継のたびに MAC は書き換わり、IP は変わらず、TTL は減る。</p>
+          <span class="q-cta">はじめる →</span>
+        </a>
+
+        <a class="quest-card" href="stage6.html" data-stage="6" style="--accent:#1f766e;--accent-bg:#e7f5f2">
+          <div class="q-top"><span class="q-num">6</span><span class="q-suit" aria-hidden="true">🏷️</span></div>
+          <div class="q-meta"><span class="q-tag">DHCP</span><span class="q-time">⏱ 約11分</span></div>
+          <div class="q-title">DHCP</div>
+          <p class="q-desc">Wi-Fi につないだだけで住所が決まるしくみ。Discover・Offer・Request・Ack の4つのやり取り。</p>
+          <span class="q-cta">はじめる →</span>
+        </a>
+
+        <a class="quest-card" href="stage7.html" data-stage="7" style="--accent:#a14b7a;--accent-bg:#f9ebf3">
+          <div class="q-top"><span class="q-num">7</span><span class="q-suit" aria-hidden="true">📖</span></div>
+          <div class="q-meta"><span class="q-tag">DNS</span><span class="q-time">⏱ 約12分</span></div>
+          <div class="q-title">DNS</div>
+          <p class="q-desc">名前を右から読み、ルート・.com・example.com の担当に順にたずねる。答えを覚えるキャッシュと期限。</p>
+          <span class="q-cta">はじめる →</span>
+        </a>
+
+        <a class="quest-card" href="stage8.html" data-stage="8" style="--accent:#8a5a24;--accent-bg:#f6eedd">
+          <div class="q-top"><span class="q-num">8</span><span class="q-suit" aria-hidden="true">🤝</span></div>
+          <div class="q-meta"><span class="q-tag">TCP/UDP</span><span class="q-time">⏱ 約14分</span></div>
+          <div class="q-title">TCPとUDP</div>
+          <p class="q-desc">どのアプリに渡すかはポート番号。握手・確認応答・再送で確実に届ける TCP と、速さ優先の UDP。</p>
+          <span class="q-cta">はじめる →</span>
+        </a>
+
+        <a class="quest-card" href="stage9.html" data-stage="9" style="--accent:#3f6191;--accent-bg:#eaf0f8">
+          <div class="q-top"><span class="q-num">9</span><span class="q-suit" aria-hidden="true">🌍</span></div>
+          <div class="q-meta"><span class="q-tag">HTTP</span><span class="q-time">⏱ 約14分</span></div>
+          <div class="q-title">HTTP</div>
+          <p class="q-desc">URL を入れてから表示まで、ここまでの道具を全部使って通しで追う。リクエストとレスポンス、HTTP/2・HTTP/3。</p>
+          <span class="q-cta">はじめる →</span>
+        </a>
+
+        <a class="quest-card" href="stage10.html" data-stage="10" style="--accent:#2f6f8f;--accent-bg:#e8f2f7">
+          <div class="q-top"><span class="q-num">10</span><span class="q-suit" aria-hidden="true">🔐</span></div>
+          <div class="q-meta"><span class="q-tag">TLS</span><span class="q-time">⏱ 約15分</span></div>
+          <div class="q-title">暗号とTLS</div>
+          <p class="q-desc">盗み見を共通鍵暗号と鍵交換で、なりすましを証明書と認証局の署名の連鎖で防ぐ。https の中身。</p>
+          <span class="q-cta">はじめる →</span>
+        </a>
+
+        <a class="quest-card" href="stage11.html" data-stage="11" style="--accent:#8a3a2a;--accent-bg:#f9ece8">
+          <div class="q-top"><span class="q-num">11</span><span class="q-suit" aria-hidden="true">🔁</span></div>
+          <div class="q-meta"><span class="q-tag">NAT</span><span class="q-time">⏱ 約12分</span></div>
+          <div class="q-title">NAT</div>
+          <p class="q-desc">家の中はプライベートアドレス、外ではルーターの1つの住所。ポート番号まで書き換えて変換表で区別する。</p>
+          <span class="q-cta">はじめる →</span>
+        </a>
+
+        <a class="quest-card" href="stage12.html" data-stage="12" style="--accent:#2f5a9e;--accent-bg:#e9eff8">
+          <div class="q-top"><span class="q-num">12</span><span class="q-suit" aria-hidden="true">6️⃣</span></div>
+          <div class="q-meta"><span class="q-tag">IPv6</span><span class="q-time">⏱ 約12分</span></div>
+          <div class="q-title">IPv6</div>
+          <p class="q-desc">128ビットの住所。16進数で8つに区切る書き方と省略のルール。NAT の要らない世界と、IPv4 との共存。</p>
+          <span class="q-cta">はじめる →</span>
+        </a>
+
+        <a class="quest-card" href="stage13.html" data-stage="13" style="--accent:#5a7a2f;--accent-bg:#eef5e3">
+          <div class="q-top"><span class="q-num">13</span><span class="q-suit" aria-hidden="true">🧱</span></div>
+          <div class="q-meta"><span class="q-tag">VLAN</span><span class="q-time">⏱ 約11分</span></div>
+          <div class="q-title">VLAN</div>
+          <p class="q-desc">1台のスイッチを設定だけで分ける。ブロードキャストの届く範囲、スイッチ間のタグ、VLAN の間はルーターで。</p>
+          <span class="q-cta">はじめる →</span>
+        </a>
+
+        <a class="quest-card" href="stage14.html" data-stage="14" style="--accent:#b06d22;--accent-bg:#fbf0e1">
+          <div class="q-top"><span class="q-num">14</span><span class="q-suit" aria-hidden="true">🛡️</span></div>
+          <div class="q-meta"><span class="q-tag">防火壁</span><span class="q-time">⏱ 約12分</span></div>
+          <div class="q-title">ファイアウォール</div>
+          <p class="q-desc">ルールを上から順に当てはめ、最後は拒否。行きの通信を覚えて返事だけを通すステートフルなしくみ。</p>
+          <span class="q-cta">はじめる →</span>
+        </a>
+
+        <a class="quest-card" href="stage15.html" data-stage="15" style="--accent:#444f6b;--accent-bg:#eceff5">
+          <div class="q-top"><span class="q-num">15</span><span class="q-suit" aria-hidden="true">🗺️</span></div>
+          <div class="q-meta"><span class="q-tag">まとめ</span><span class="q-time">⏱ 約13分</span></div>
+          <div class="q-title">層で切り分ける</div>
+          <p class="q-desc">道具を TCP/IP の4層と OSI の7層に並べ、つながらないときに下の層から順に切り分ける。</p>
+          <span class="q-cta">はじめる →</span>
+        </a>
       </div>
-      <div id="table-views"></div>
+    </section>
 
-      <footer id="control-bar">
-        <button id="btn-play" title="再生">▶ 再生</button>
-        <button id="btn-pause" title="一時停止">⏸ 一時停止</button>
-        <button id="btn-step" title="1ステップ進める">1ステップ</button>
-        <label class="speed-label">速度
-          <input type="range" id="speed-slider" min="0.5" max="3" step="0.5" value="1">
-        </label>
-        <button id="btn-reset" title="ステージをやり直す">↺ ステージリセット</button>
-      </footer>
+    <div id="book-recommend"></div>
+  </main>
 
-      <div id="log-panel">
-        <h3>通信ログ</h3>
-        <ul id="log-list"></ul>
-      </div>
-
-      <div id="book-recommend"></div>
-
-      <section id="ending-screen" hidden></section>
-    </main>
-  </div>
+  <footer>
+    <p>NO DOWNLOAD. NO REGISTRATION. JUST LEARN. &nbsp;© <span id="year"></span> ruglerugle</p>
+    <div class="footer-suits" aria-hidden="true"><span>🌐</span><span>🔌</span><span>📨</span><span>🔐</span></div>
+  </footer>
 </div>
-
-<script type="module" src="js/main.js"></script>
+<script>document.getElementById("year").textContent = new Date().getFullYear();</script>
+<script src="js/stages.js?v=20261108b"></script>
+<script src="js/progress.js?v=20261108b"></script>
+<script>QUEST.initCoverPage();</script>
 <script src="https://my.habatakijuku.com/sync.js" defer></script>
 </body>
 </html>

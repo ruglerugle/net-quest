@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f2236">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-9RTQCP2HXM"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-9RTQCP2HXM');
+</script>
+<title>全ステージクリア ― ネットワーククエスト</title>
+<meta name="description" content="0と1を信号で送るところから、スイッチと MAC アドレス、IP アドレスとサブネット、ARP、ルーター、DHCP、DNS、TCP と UDP、HTTP、暗号と TLS、NAT、IPv6、VLAN、ファイアウォール、障害の切り分けまで、やり取りを1歩ずつ追いながら学ぶ全15ステージの無料学習サイト。ねこ博士とうさ美が案内します。">
+<link rel="canonical" href="https://informatics.habatakijuku.com/net-quest/complete">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="ネットワーククエスト">
+<meta property="og:locale" content="ja_JP">
+<meta property="og:title" content="全ステージクリア ― ネットワーククエスト">
+<meta property="og:description" content="動画はどうやって地球の裏から届くのか。スイッチ・IP・DNS・TCP・HTTP・TLS・IPv6 まで、やり取りを1歩ずつ追う全15ステージ。">
+<meta property="og:url" content="https://informatics.habatakijuku.com/net-quest/complete">
+<meta property="og:image" content="https://informatics.habatakijuku.com/images/ogp/net-quest.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌐</text></svg>">
+<link rel="stylesheet" href="design-system.css?v=20261108b">
+<meta name="robots" content="noindex">
+</head>
+<body>
+<div class="shell">
+  <nav class="topbar" aria-label="サイト情報">
+    <span class="brand-badge" aria-hidden="true">🌐</span>
+    <span class="brand-copy">
+      <strong>ネットワーククエスト</strong>
+      <small>NETWORK QUEST</small>
+    </span>
+    <a class="head-reset" style="margin-left:auto" href="/" title="情報の冒険（シリーズの地図）へ">🧭 シリーズの地図</a>
+  </nav>
+
+  <header class="hero">
+    <div class="hero-copy">
+      <h1><span class="line">地球の裏まで、届け方が分かった ∎</span></h1>
+      <p>信号で0と1を送り、MAC アドレスで同じ建物の中に、IP アドレスとルーターでネットワークをまたいで届ける。DHCP で住所をもらい、DNS で名前を引き、TCP で確実に、HTTP でページを頼み、TLS で守る。住所不足は NAT と IPv6、守りは VLAN とファイアウォール。そして、つながらないときは下の層から。旅の記録で振り返ろう。</p>
+    </div>
+  </header>
+
+  <main>
+    <section class="board" aria-labelledby="recap-heading">
+      <div class="board-head">
+        <div><h2 id="recap-heading">ここまでの旅を振り返ろう</h2></div>
+        <p>全15ステージ、おつかれさま</p>
+      </div>
+      <div class="recap-list">
+        <div class="recap-item">
+          <div class="recap-num">1</div>
+          <div class="recap-body">
+            <div class="recap-title">信号と層</div>
+            <div class="recap-desc">0と1は信号の変化で送る。共有する線や電波ではぶつかるので決まりが要る。届ける仕事は層に分け、すぐ下の層に頼む。</div>
+          </div>
+        </div>
+        <div class="recap-item">
+          <div class="recap-num">2</div>
+          <div class="recap-body">
+            <div class="recap-title">スイッチとMACアドレス</div>
+            <div class="recap-desc">フレームには MAC アドレスのあて先・送り元。スイッチは送り元から場所を覚え、知らない相手にはフラッディング。ポートごとに分かれるので衝突しない。</div>
+          </div>
+        </div>
+        <div class="recap-item">
+          <div class="recap-num">3</div>
+          <div class="recap-body">
+            <div class="recap-title">IPアドレスとサブネット</div>
+            <div class="recap-desc">IP アドレスはネットワーク部とホスト部。マスクと AND してネットワーク部が同じなら直接、違えばルーターへ。/24 で254台。</div>
+          </div>
+        </div>
+        <div class="recap-item">
+          <div class="recap-num">4</div>
+          <div class="recap-body">
+            <div class="recap-title">ARP</div>
+            <div class="recap-desc">ARP 要求はブロードキャスト、応答は本人あて。答えは ARP 表にしばらく覚える。答えが本物かは確かめないので、なりすましに注意。</div>
+          </div>
+        </div>
+        <div class="recap-item">
+          <div class="recap-num">5</div>
+          <div class="recap-body">
+            <div class="recap-title">ルーター</div>
+            <div class="recap-desc">MAC は区間ごとの「次の人」、IP は端から端までの「最後の人」。経路表で次の渡し先を決め、TTL で回り続けるパケットを消す。</div>
+          </div>
+        </div>
+        <div class="recap-item">
+          <div class="recap-num">6</div>
+          <div class="recap-body">
+            <div class="recap-title">DHCP</div>
+            <div class="recap-desc">まだ住所が無いので全員に呼びかけ、DHCP サーバーから住所・マスク・ゲートウェイ・DNS を借りる。期限はリース。169.254 は失敗の印。</div>
+          </div>
+        </div>
+        <div class="recap-item">
+          <div class="recap-num">7</div>
+          <div class="recap-body">
+            <div class="recap-title">DNS</div>
+            <div class="recap-desc">スマホはキャッシュサーバーに1回たずね、キャッシュサーバーがルートから順にたどる。答えには期限があり、そのあいだ覚えて使い回す。</div>
+          </div>
+        </div>
+        <div class="recap-item">
+          <div class="recap-num">8</div>
+          <div class="recap-body">
+            <div class="recap-title">TCPとUDP</div>
+            <div class="recap-desc">IP アドレス＋ポート番号であて先が決まる。TCP は3ウェイハンドシェイクと通し番号・ACK・再送で確実に。UDP は送るだけで速い。</div>
+          </div>
+        </div>
+        <div class="recap-item">
+          <div class="recap-num">9</div>
+          <div class="recap-body">
+            <div class="recap-title">HTTP</div>
+            <div class="recap-desc">DNS → ARP とルーター → TCP の握手 → TLS → GET → 200 OK。画像なども別にリクエスト。HTTP/2 は同時に、HTTP/3 は QUIC で詰まりにくく。</div>
+          </div>
+        </div>
+        <div class="recap-item">
+          <div class="recap-num">10</div>
+          <div class="recap-body">
+            <div class="recap-title">暗号とTLS</div>
+            <div class="recap-desc">鍵は送らずに鍵交換で共有し、中身は共通鍵暗号で守る。証明書の署名をルート認証局までたどり、名前の一致も確かめる。</div>
+          </div>
+        </div>
+        <div class="recap-item">
+          <div class="recap-num">11</div>
+          <div class="recap-body">
+            <div class="recap-title">NAT</div>
+            <div class="recap-desc">NAPT は送り元の住所とポートを書き換えて表に覚え、返事を戻す。外から突然来た通信は行き先が無く届かない。</div>
+          </div>
+        </div>
+        <div class="recap-item">
+          <div class="recap-num">12</div>
+          <div class="recap-body">
+            <div class="recap-title">IPv6</div>
+            <div class="recap-desc">IPv6 は128ビットで住所が十分。先頭の0を省き、0 の続きを1か所だけ :: に。守りはファイアウォールで。移行は少しずつ進行中。</div>
+          </div>
+        </div>
+        <div class="recap-item">
+          <div class="recap-num">13</div>
+          <div class="recap-body">
+            <div class="recap-title">VLAN</div>
+            <div class="recap-desc">ポートごとに VLAN 番号を決め、同じ番号どうしだけで渡す。ブロードキャストも VLAN の中だけ。間はルーターで、そこでルールをかける。</div>
+          </div>
+        </div>
+        <div class="recap-item">
+          <div class="recap-num">14</div>
+          <div class="recap-body">
+            <div class="recap-title">ファイアウォール</div>
+            <div class="recap-desc">最初に当たったルールで決め、最後は「拒否」。原則拒否・必要なものだけ許可。返事は行きを覚えて通す。中身の守りは別に重ねる。</div>
+          </div>
+        </div>
+        <div class="recap-item">
+          <div class="recap-num">15</div>
+          <div class="recap-body">
+            <div class="recap-title">層で切り分ける</div>
+            <div class="recap-desc">TCP/IP の4層で実際のインターネットは動き、OSI の7層は共通の言葉。障害は下の層から確かめれば、原因の場所が絞れる。</div>
+          </div>
+        </div>
+      </div>
+      <div class="complete-actions">
+        <a class="btn btn-primary" href="/">情報の冒険の地図へ →</a>
+        <a class="btn" href="./">トップへ戻る</a>
+        <a class="btn" href="https://x.com/intent/post?text=%E3%83%8D%E3%83%83%E3%83%88%E3%83%AF%E3%83%BC%E3%82%AF%E3%82%AF%E3%82%A8%E3%82%B9%E3%83%88%E3%82%92%E5%85%A815%E3%82%B9%E3%83%86%E3%83%BC%E3%82%B8%E3%82%AF%E3%83%AA%E3%82%A2%E3%81%97%E3%81%9F%EF%BC%81&url=https%3A%2F%2Finformatics.habatakijuku.com%2Fnet-quest%2F" target="_blank" rel="noopener">𝕏 でシェア</a>
+        <button class="btn" id="btn-reset-all">🔄 最初から</button>
+      </div>
+    </section>
+    <div id="book-recommend"></div>
+  </main>
+
+  <footer>
+    <p>NO DOWNLOAD. NO REGISTRATION. JUST LEARN. &nbsp;© <span id="year"></span> ruglerugle</p>
+    <div class="footer-suits" aria-hidden="true"><span>🌐</span><span>🔌</span><span>📨</span><span>🔐</span></div>
+  </footer>
+</div>
+<script>document.getElementById("year").textContent = new Date().getFullYear();</script>
+<script src="js/stages.js?v=20261108b"></script>
+<script src="js/progress.js?v=20261108b"></script>
+<script>QUEST.initCompletePage();</script>
+<script src="https://my.habatakijuku.com/sync.js" defer></script>
+</body>
+</html>

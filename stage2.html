@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f2236">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-9RTQCP2HXM"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-9RTQCP2HXM');
+</script>
+<title>STAGE2 スイッチとMACアドレス ― ネットワーククエスト</title>
+<meta name="description" content="同じ建物の中の機械どうしで届けるには、機械ごとの番号 MAC アドレスと、スイッチが要る。スイッチがフレームの送り元を見てどのポートに誰がいるかを覚え、分からない相手には全員に配る（フラッディング）しくみを確かめる。">
+<link rel="canonical" href="https://informatics.habatakijuku.com/net-quest/stage2">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="ネットワーククエスト">
+<meta property="og:locale" content="ja_JP">
+<meta property="og:title" content="STAGE2 スイッチとMACアドレス ― ネットワーククエスト">
+<meta property="og:description" content="スイッチは送り元を見て覚える。MAC アドレスとフラッディング。">
+<meta property="og:url" content="https://informatics.habatakijuku.com/net-quest/stage2">
+<meta property="og:image" content="https://informatics.habatakijuku.com/images/ogp/net-quest.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌐</text></svg>">
+<link rel="stylesheet" href="design-system.css?v=20261108b">
+<link rel="stylesheet" href="lab.css?v=20261108b">
+<script src="js/stages.js?v=20261108b"></script>
+<script src="js/progress.js?v=20261108b"></script>
+<script src="js/labs.js?v=20261108b"></script>
+</head>
+<body>
+<div class="app-shell side-collapsed" id="app-shell">
+  <header class="game-header">
+    <div class="brand">
+      <div class="brand-title"><a class="head-reset home-badge" href="./" title="トップへ" aria-label="トップへ">🌐</a> <span>ネットワーククエスト</span></div>
+      <div class="brand-sub">STAGE 2 ― スイッチとMACアドレス ―</div>
+    </div>
+    <div class="head-progress-wrap">
+      <div class="head-progress-label" id="progress-label">クリア 0 / 15</div>
+      <div class="head-progress" role="progressbar" aria-label="クリア済みステージ数" aria-valuemin="0" aria-valuemax="15" aria-valuenow="0"><div class="head-progress-fill" id="progress-fill" style="width:0%"></div></div>
+    </div>
+    <div class="header-actions">
+      <a class="head-reset" href="/" title="情報の冒険（シリーズの地図）へ">🧭 地図</a>
+      <button class="head-reset" id="btn-reset-all">🔄 最初から</button>
+      <button class="head-reset" id="head-nav-toggle" title="ステージ一覧の表示切替">☰ ナビ</button>
+    </div>
+  </header>
+
+  <div class="game-layout">
+    <div class="side-backdrop" id="side-backdrop"></div>
+    <aside class="side-panel">
+      <div class="side-head">
+        <button class="side-toggle" id="sidebar-toggle" title="ステージ一覧の表示切替" aria-label="ステージ一覧の表示切替">☰</button>
+        <span class="side-head-text">📚 ステージ一覧</span>
+      </div>
+      <div class="side-list" id="side-list"></div>
+    </aside>
+
+    <main class="main-area">
+      <div class="chapter-head">
+        <span class="chapter-badge">STAGE 2</span><h1 class="chapter-title">スイッチとMACアドレス</h1>
+        <div class="chapter-sub">同じ建物の中で届ける</div>
+      </div>
+
+      <div class="mission-box">
+        <div class="mission-label">🎯 ミッション</div>
+        <div class="mission-text">MAC アドレスの役割と、スイッチがどこに誰がいるかを覚えるしくみを説明できるようになろう。スイッチに3回フレームを送って学習の様子を確かめ、確認クイズに全問正解すれば合格。</div>
+        <span class="mission-status" id="mission-status">未達成</span>
+      </div>
+
+      <div class="dialogue-scene">
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">同じ部屋に、PC が4台ある。PC-A から PC-B にデータを送りたい。まず、相手をどうやって指定する？</div>
+        </div>
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbit.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble">名前……は人間が付けたものだから、機械どうしだと番号ですか？</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">そう。ネットワークにつなぐ部品（LAN カードや Wi-Fi の部品）には、作られたときに世界に1つだけの番号が付けられている。これを <strong>MAC アドレス</strong>と呼ぶ。48ビットの数で、<code>3c:22:fb:0a:91:7e</code> のように16進数で書く。前半はメーカーの番号、後半はメーカーの中の通し番号だ。</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">データは、そのまま流すのではなく、<strong>フレーム</strong>という小包にして送る。フレームの頭には、あて先の MAC アドレスと送り元の MAC アドレスが書いてある。</div>
+        </div>
+      </div>
+<div class="formula-box">
+  <span class="step">フレーム ＝ ［あて先 MAC］［送り元 MAC］［中身のデータ］［壊れていないか確かめる値］</span>
+</div>
+      <div class="dialogue-scene">
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">PC を何台もつなぐ真ん中の箱が<strong>スイッチ</strong>だ。ケーブルを差す口（<strong>ポート</strong>）がいくつもある。スイッチは、届いたフレームのあて先を見て、その相手がつながっているポートにだけ送り出す。</div>
+        </div>
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbit.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble">でも、どのポートに誰がつながっているかを、スイッチはどうやって知るんですか？ 最初はだれも教えてくれないですよね。</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">いい質問だね。スイッチは、届いたフレームの<strong>送り元</strong>を見て覚える。「ポート1から来たフレームの送り元が aa:01 なら、aa:01 はポート1にいる」と、<strong>MAC アドレス表</strong>に書き込むんだ。</div>
+        </div>
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbitThink.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble"> じゃあ、まだ表に無い相手にあてたフレームは……どこに送ればいいか分からない。</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">そのときは、送り元のポート以外の<strong>全部のポート</strong>に送る。これを<strong>フラッディング</strong>（あふれさせる）と呼ぶ。関係ない PC は、あて先が自分でなければ捨てるだけだ。本当の相手が返事をすれば、その返事の送り元から、相手のポートも覚えられる。</div>
+        </div>
+      </div>
+<div class="lab" data-lab="switchlearn" data-id="net-s2-switch"></div>
+      <div class="dialogue-scene">
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbit.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble">最初だけ全員に配って、だんだん必要な相手だけに送れるようになるんですね。STAGE1 の衝突の話は、どうなったんですか？</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">スイッチは、ポートごとに別々の線で PC とつながっていて、受け取ったフレームを一度ためてから、あて先のポートにだけ送る。だから、ほかの PC の通信とぶつからない。1本の線を共有していたころの衝突の問題は、スイッチのおかげでほぼ無くなったんだ。</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">全員に配りたいときもある。あて先を <code>ff:ff:ff:ff:ff:ff</code>（全部1）にしたフレームは、<strong>ブロードキャスト</strong>と呼ばれ、スイッチは全部のポートに送る。STAGE4 と STAGE6 で使うよ。</div>
+        </div>
+      </div>
+
+      <h2 class="quiz-head">確認クイズ</h2>
+      <div class="quiz-card" data-quiz>
+        <p class="quiz-q">Q1. スイッチが MAC アドレス表に書き込む情報は、フレームのどこから得る？</p>
+        <div class="choice-list">
+          <button class="choice-btn">あて先の MAC アドレス</button>
+          <button class="choice-btn">中身のデータ</button>
+          <button class="choice-btn">送り元の MAC アドレスと、それが届いたポート</button>
+        </div>
+        <div class="quiz-explain" hidden>正解！ 「このポートから来たフレームの送り元はこの MAC アドレス」と覚える。あて先からは、相手の場所は分からない。</div>
+      </div>
+      <div class="quiz-card" data-quiz>
+        <p class="quiz-q">Q2. スイッチが、表に無い MAC アドレスあてのフレームを受け取ったら？</p>
+        <div class="choice-list">
+          <button class="choice-btn">フレームを捨てる</button>
+          <button class="choice-btn">送り元のポート以外の全部のポートに送る（フラッディング）</button>
+          <button class="choice-btn">送り元に送り返す</button>
+        </div>
+        <div class="quiz-explain" hidden>正解！ どこにいるか分からないので全員に配る。返事が来れば、その送り元から場所を覚えられる。</div>
+      </div>
+      <div class="quiz-card" data-quiz>
+        <p class="quiz-q">Q3. MAC アドレスについて正しいのは？</p>
+        <div class="choice-list">
+          <button class="choice-btn">ネットワークにつなぐ部品ごとに付けられた、48ビットの番号</button>
+          <button class="choice-btn">引っ越しのたびに変わる住所のような番号</button>
+          <button class="choice-btn">インターネット全体での住所で、遠くの相手にも使う</button>
+        </div>
+        <div class="quiz-explain" hidden>正解！ 部品に付いた番号で、同じネットワークの中で相手を指定するのに使う。遠くの相手には IP アドレス（STAGE3）を使う。</div>
+      </div>
+
+      <div class="stage-nav">
+        <a class="btn" href="stage1.html">← 前のステージ</a>
+        <button class="btn btn-primary" id="btn-next" disabled>次へ →</button>
+      </div>
+
+      <div id="book-recommend"></div>
+    </main>
+  </div>
+</div>
+
+<script>QUEST.initStagePage(2);</script>
+
+<script src="https://my.habatakijuku.com/sync.js" defer></script>
+</body>
+</html>

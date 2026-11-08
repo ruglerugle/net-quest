@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f2236">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-9RTQCP2HXM"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-9RTQCP2HXM');
+</script>
+<title>STAGE13 VLAN ― ネットワーククエスト</title>
+<meta name="description" content="1台のスイッチを、設定だけでいくつかの別のネットワークに分ける VLAN。ブロードキャストが届く範囲、ポートに番号を付ける仕組み、スイッチどうしをつなぐ線でフレームに VLAN の番号（タグ）を付ける方法、VLAN の間はルーターでつなぐことを確かめる。">
+<link rel="canonical" href="https://informatics.habatakijuku.com/net-quest/stage13">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="ネットワーククエスト">
+<meta property="og:locale" content="ja_JP">
+<meta property="og:title" content="STAGE13 VLAN ― ネットワーククエスト">
+<meta property="og:description" content="1台のスイッチを分ける VLAN。ブロードキャストの範囲とタグ。">
+<meta property="og:url" content="https://informatics.habatakijuku.com/net-quest/stage13">
+<meta property="og:image" content="https://informatics.habatakijuku.com/images/ogp/net-quest.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌐</text></svg>">
+<link rel="stylesheet" href="design-system.css?v=20261108b">
+<link rel="stylesheet" href="lab.css?v=20261108b">
+<script src="js/stages.js?v=20261108b"></script>
+<script src="js/progress.js?v=20261108b"></script>
+<script src="js/labs.js?v=20261108b"></script>
+</head>
+<body>
+<div class="app-shell side-collapsed" id="app-shell">
+  <header class="game-header">
+    <div class="brand">
+      <div class="brand-title"><a class="head-reset home-badge" href="./" title="トップへ" aria-label="トップへ">🌐</a> <span>ネットワーククエスト</span></div>
+      <div class="brand-sub">STAGE 13 ― VLAN ―</div>
+    </div>
+    <div class="head-progress-wrap">
+      <div class="head-progress-label" id="progress-label">クリア 0 / 15</div>
+      <div class="head-progress" role="progressbar" aria-label="クリア済みステージ数" aria-valuemin="0" aria-valuemax="15" aria-valuenow="0"><div class="head-progress-fill" id="progress-fill" style="width:0%"></div></div>
+    </div>
+    <div class="header-actions">
+      <a class="head-reset" href="/" title="情報の冒険（シリーズの地図）へ">🧭 地図</a>
+      <button class="head-reset" id="btn-reset-all">🔄 最初から</button>
+      <button class="head-reset" id="head-nav-toggle" title="ステージ一覧の表示切替">☰ ナビ</button>
+    </div>
+  </header>
+
+  <div class="game-layout">
+    <div class="side-backdrop" id="side-backdrop"></div>
+    <aside class="side-panel">
+      <div class="side-head">
+        <button class="side-toggle" id="sidebar-toggle" title="ステージ一覧の表示切替" aria-label="ステージ一覧の表示切替">☰</button>
+        <span class="side-head-text">📚 ステージ一覧</span>
+      </div>
+      <div class="side-list" id="side-list"></div>
+    </aside>
+
+    <main class="main-area">
+      <div class="chapter-head">
+        <span class="chapter-badge">STAGE 13</span><h1 class="chapter-title">VLAN</h1>
+        <div class="chapter-sub">1台のスイッチを分ける</div>
+      </div>
+
+      <div class="mission-box">
+        <div class="mission-label">🎯 ミッション</div>
+        <div class="mission-text">VLAN が何を分けるのか、VLAN の間の通信がどう行われるのかを説明できるようになろう。ブロードキャストが届く範囲を追い、確認クイズに全問正解すれば合格。</div>
+        <span class="mission-status" id="mission-status">未達成</span>
+      </div>
+
+      <div class="dialogue-scene">
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">ある学校で、先生の PC と生徒の PC が同じスイッチにつながっている。先生の PC には成績のデータがある。同じネットワークにいると、どんな心配がある？</div>
+        </div>
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbit.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble">ARP のブロードキャストは全員に届くし、ARP にはうその答えを確かめる仕組みも無かった（STAGE4）。生徒の PC から、先生の PC の通信をのぞかれるかもしれません。</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">そう。いちばん確実なのは、先生用と生徒用でスイッチを別々に買って、線も分けることだ。でも、部屋の配置が変わるたびに配線をやり直すのは大変だ。そこで、1台のスイッチの中を、<strong>設定だけで</strong>いくつかの別のネットワークに分ける。これを <strong>VLAN</strong>（仮想 LAN）と呼ぶ。</div>
+        </div>
+      </div>
+<div class="formula-box">
+  <span class="step">ポートごとに VLAN の番号を決める：ポート1〜4 は VLAN10（先生）、ポート5〜8 は VLAN20（生徒）</span>
+  <span class="step">スイッチは、同じ VLAN の番号のポートどうしでしかフレームを渡さない</span>
+  <span class="step">ブロードキャストも、同じ VLAN の中にしか届かない（ブロードキャストが届く範囲を「ブロードキャストドメイン」と呼ぶ）</span>
+</div>
+<div class="lab" id="lad-s13"></div>
+<script>
+Ladder.mount(document.getElementById("lad-s13"), {
+  id: "net-s13-vlan", title: "ブロードキャストはどこまで届く？",
+  actors: ["先生PC1 (VLAN10)", "先生PC2 (VLAN10)", "スイッチ", "生徒PC1 (VLAN20)", "生徒PC2 (VLAN20)"],
+  steps: [
+    { from: 0, to: 2, label: "ARP 要求（全員へ）", detail: "先生PC1 が ARP のブロードキャストを出した。" },
+    { from: 2, to: 1, label: "VLAN10 だけに配る", detail: "スイッチは、届いたポートの VLAN 番号（10）を見て、同じ VLAN10 のポートにだけ配った。生徒の PC には届かない。" },
+    { from: 3, to: 2, label: "生徒PC1 → 先生PC1 あて", detail: "生徒PC1 が先生PC1 にフレームを送ろうとしても……" },
+    { from: 2, to: 2, label: "", detail: "VLAN が違うので、スイッチは渡さない。同じスイッチにつながっていても、別のネットワークとして扱われる。" }
+  ]
+});
+</script>
+      <div class="dialogue-scene">
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbit.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble">生徒の PC から先生の PC へは、どうやっても届かないんですか？ 宿題を提出するときは困りそうです。</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">VLAN が違えば、別のネットワークだ。別のネットワークの間は、STAGE5 と同じく<strong>ルーター</strong>（または、ルーターの働きも持った高機能なスイッチ。L3スイッチと呼ぶ）を通す。ルーターを通すところで、「生徒から先生へは、提出用のサーバーにだけ通す」のように、次のステージのファイアウォールのルールで細かく決められる。</div>
+        </div>
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbit.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble">スイッチが2台あって、どちらにも VLAN10 と VLAN20 の PC がつながっていたら、スイッチの間の線は VLAN ごとに2本要るんですか？</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">1本で済ませる方法がある。スイッチどうしをつなぐ線では、フレームに「これは VLAN10 のもの」という小さな札（<strong>タグ</strong>）を付けて送る。受け取ったスイッチは札を見て、正しい VLAN のポートに渡す。この方法の決まりは IEEE 802.1Q という名前で、ほとんどのスイッチが対応している。</div>
+        </div>
+      </div>
+
+      <h2 class="quiz-head">確認クイズ</h2>
+      <div class="quiz-card" data-quiz>
+        <p class="quiz-q">Q1. VLAN を使うと何ができる？</p>
+        <div class="choice-list">
+          <button class="choice-btn">1台のスイッチを、設定だけでいくつかの別のネットワークに分けられる</button>
+          <button class="choice-btn">ネットワークの通信速度を2倍にできる</button>
+          <button class="choice-btn">IP アドレスが要らなくなる</button>
+        </div>
+        <div class="quiz-explain" hidden>正解！ ポートごとに VLAN 番号を決め、同じ番号どうしでしかフレームを渡さない。</div>
+      </div>
+      <div class="quiz-card" data-quiz>
+        <p class="quiz-q">Q2. VLAN10 の PC が出したブロードキャストが届くのは？</p>
+        <div class="choice-list">
+          <button class="choice-btn">スイッチにつながっている全部の PC</button>
+          <button class="choice-btn">ルーターの向こうの全部のネットワーク</button>
+          <button class="choice-btn">同じ VLAN10 のポートにつながっている PC だけ</button>
+        </div>
+        <div class="quiz-explain" hidden>正解！ ブロードキャストが届く範囲（ブロードキャストドメイン）は VLAN ごとに分かれる。</div>
+      </div>
+      <div class="quiz-card" data-quiz>
+        <p class="quiz-q">Q3. VLAN10 の PC から VLAN20 の PC へ通信するには？</p>
+        <div class="choice-list">
+          <button class="choice-btn">同じスイッチなので、そのまま届く</button>
+          <button class="choice-btn">ルーター（またはルーターの働きを持つスイッチ）を通す</button>
+          <button class="choice-btn">両方の PC を同じ MAC アドレスにする</button>
+        </div>
+        <div class="quiz-explain" hidden>正解！ VLAN が違えば別のネットワーク。間はルーターで中継し、そこでファイアウォールのルールも使える。</div>
+      </div>
+
+      <div class="stage-nav">
+        <a class="btn" href="stage12.html">← 前のステージ</a>
+        <button class="btn btn-primary" id="btn-next" disabled>次へ →</button>
+      </div>
+
+      <div id="book-recommend"></div>
+    </main>
+  </div>
+</div>
+
+<script>QUEST.initStagePage(13);</script>
+
+<script src="https://my.habatakijuku.com/sync.js" defer></script>
+</body>
+</html>
